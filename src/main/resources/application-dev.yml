@@ -1,0 +1,10 @@
+server.port: 9092
+logging.config: classpath:logback-dev.xml
+# 开发环境：java -jar XXX.jar --spring.profiles.active=dev 
+spring:  
+  profiles: dev
+spring.datasource:
+    url: jdbc:mysql://iooicloud.com:8306/erm?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: root
+    password: tuojian123<>?
+    driverClassName: com.mysql.jdbc.Driver

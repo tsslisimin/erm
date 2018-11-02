@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmStuValueDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmStuValueEntity" id="ermStuValueMap">
+		<result property="id" column="id" />
+		<result property="flag" column="flag" />
+		<result property="stuId" column="stu_id" />
+		<result property="fieldId" column="field_id" />
+		<result property="fieldValVal" column="field_val_val" />
+		<result property="fieldValKey" column="field_val_key" />
+	</resultMap>
+
+	<select id="queryObject" resultMap="ermStuValueMap">
+		select * from
+		tb_erm_stu_value where id = #{value}
+	</select>
+
+	<select id="queryObjectByStuIdAndFieldId" resultMap="ermStuValueMap">
+		select *
+		from
+		tb_erm_stu_value where stu_id = #{studentId} and field_id =
+		#{fieldId} 
+	</select>
+	
+	<select id="queryObjectByStuValue" resultMap="ermStuValueMap">
+		select *
+		from
+		tb_erm_stu_value where stu_id = #{studentId} and field_id =
+		#{fieldId} and field_val_key = #{valKey} 
+	</select>
+
+	<select id="queryList" resultMap="ermStuValueMap">
+		select * from tb_erm_stu_value
+		where 1 = 1
+		<if test="stuId != null">
+			and stu_id = #{stuId} 
+		</if>
+		<if test="flag != null">
+			and flag = #{flag}
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		tb_erm_stu_value
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmStuValueEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_stu_value
+		(
+		`stu_id`,
+		`field_id`,
+		`field_val_val`,
+		`flag`,
+		`field_val_key`
+		)
+		values
+		(
+		#{stuId},
+		#{fieldId},
+		#{fieldValVal},
+		#{flag},
+		#{fieldValKey}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmStuValueEntity">
+		update tb_erm_stu_value
+		<set>
+			<if test="stuId != null">`stu_id` = #{stuId}, </if>
+			<if test="fieldId != null">`field_id` = #{fieldId}, </if>
+			<if test="flag != null">`flag` = #{flag}, </if>
+			<if test="fieldValVal != null">`field_val_val` = #{fieldValVal}, </if>
+			<if test="fieldValKey != null">`field_val_key` = #{fieldValKey}, </if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<update id="updateFlagByStuId" >
+		update tb_erm_stu_value set flag = #{flag}
+		where stu_id = #{stuId}
+	</update>
+
+	<delete id="delete">
+		delete from tb_erm_stu_value where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from tb_erm_stu_value where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="queryStuVals" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT val.stu_id,val.field_id,
+		ff.field_code,ff.field_name,val.field_val_val,ff.weight, fv.val_weight
+		FROM tb_erm_stu_value val LEFT JOIN tb_erm_field ff ON
+		val.field_id=ff.id
+		LEFT JOIN tb_erm_field_val fv ON ff.id=fv.field_id
+		AND val.field_val_key=fv.val_key WHERE 1=1
+		<if test="stuId != null">
+			and val.stu_id=#{stuId,jdbcType=INTEGER}
+		</if>
+		<if test="flag != null">
+			AND val.flag=#{flag,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="queryToAuditStudents" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT
+		t1.*,
+		cf.name AS fundName,
+		t2.`name` stuName,
+		t2.school_id,
+		t2.birth,
+		t2.stuno,
+		t2.card_type,
+		t2.idcard,
+		t2.major,
+		t2.sch_system,
+		t2.pinyin,
+		t2.engname,
+		t2.start_year,
+		t2.age,
+		t2.zone,
+		t2.grade,
+		t2.study_type,
+		t2.stu_type,
+		t2.clazz,
+		t2.telphone,
+		t2.address,
+		t2.division_code,
+		t2.residence_type,
+		t2.nature,
+		t2.birth_place,
+		t2.city_code,
+		t2.marriage_status,
+		t2.health_status,
+		t2.political_status,
+		t2.nation,
+		t2.is_foreign,
+		t2.attending_type,
+		t2.learn_type,
+		t2.low_insurance,
+		t2.handicapped,
+		t2.consume_info,
+		t2.default_bankcard,
+		t2.actual_bankcard,
+		t2.creator,
+		t2.create_time,
+		t2.updator,
+		t2.update_time,
+		t2.addressType,
+		t2.account_type,
+		t2.school_name,
+		t2.is_poor,
+		CASE t2.gender WHEN 1
+		THEN '男' WHEN 2 THEN '女' END gender,
+		t3.address,
+		t3.father,
+		t3.mother,
+		t3.father_job fatherJob,
+		t3.mother_job
+		montherJob,
+		t3.phone,
+		t2.diff_level,
+		t2.head_teache_check,
+		t2.head_teache_name,
+		t2.flag,
+		t2.note,
+		t2.is_graduation,
+		CASE t2.diff_level WHEN 0
+		THEN '不困难' WHEN 1 THEN '困难' WHEN 2 THEN '一般困难' WHEN 3 THEN '特别困难' END diffLevelName,
+	 	  CASE
+		    t1.global_status    
+		    WHEN 15
+		    THEN '发放成功' 
+		    WHEN 32 
+		    THEN '发放失败' 
+		    ELSE '尚未发放请等待' 
+		  END offeredStatus 
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON
+		t1.stu_id = t2.id
+		LEFT JOIN tb_erm_school_funded tf ON t1.funded_id =
+		tf.id
+		LEFT JOIN tb_erm_funded cf ON tf.funded_id = cf.id
+		LEFT JOIN
+		tb_erm_family t3 ON t2.family_id = t3.id
+		WHERE 1=1
+		<if test="status != null">
+			and t1.global_status= #{status,jdbcType=INTEGER}
+		</if>
+		<if test="schFundId != null">
+			AND t1.funded_id= #{schFundId,jdbcType=INTEGER}
+		</if>
+		<if test="stuId != null">
+			AND t1.stu_id = #{stuId,jdbcType=INTEGER}
+		</if>
+		<if test="diffLevel != null">
+			AND t2.diff_level = #{diffLevel,jdbcType=INTEGER}
+		</if>
+		<if test="flag != null">
+			AND t2.flag = #{flag,jdbcType=INTEGER}
+		</if>
+		<if test="isGraduated != null">
+			AND t2.is_graduation = #{isGraduated,jdbcType=INTEGER}
+		</if>
+		<if test="teacheThecked != null">
+			AND t2.head_teache_check = #{teacheThecked,jdbcType=INTEGER}
+		</if>
+		<if test="statusSet != null">
+			AND t1.global_status in
+			<foreach item="statusItem" collection="statusSet" open="("
+				separator="," close=")">
+				#{statusItem}
+			</foreach>
+		</if>
+		<if test="stuName != null and stuName != ''">
+			AND t2.name = #{stuName,jdbcType=VARCHAR}
+		</if>
+		<if test="age != null">
+			AND t2.age = #{age,jdbcType=INTEGER}
+		</if>
+		<if test="schId != null">
+			AND tf.school_id = #{schId,jdbcType=INTEGER}
+		</if>
+		<if test="year != null">
+			AND tf.year = #{year,jdbcType=INTEGER}
+		</if>
+	 	<if test="semester != null and semester != ''">
+			AND tf.semester = #{semester,jdbcType=VARCHAR}
+		</if>
+	 	<if test="schzone != null and schzone != ''">
+			AND tf.schzone = #{schzone,jdbcType=VARCHAR}
+		</if>
+		<if test="level != null and level != ''">
+			AND tf.level = #{level,jdbcType=VARCHAR}
+		</if>
+		<if test="idCard != null and idCard != ''">
+			AND t2.idcard = #{idCard,jdbcType=VARCHAR}
+		</if>
+		<if test="stuno != null and stuno != ''">
+			AND t2.stuno = #{stuno,jdbcType=VARCHAR}
+		</if>
+		<if test="grade != null and grade != ''">
+			AND t2.grade LIKE concat(concat('%',#{grade}),'%')
+		</if>
+		<if test="clazz != null and clazz != ''">
+			AND t2.clazz  LIKE concat(concat('%',#{clazz}),'%')
+		</if>
+		<if test="fundName != null and fundName != ''">
+			AND cf.name LIKE concat(concat('%',#{fundName}),'%')
+		</if>
+		<if test="fundId != null and fundId != ''">
+			AND cf.id =#{fundId}
+		</if>
+		order by t1.score desc
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	<select id="queryToAuditStudentsCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT
+		count(1)
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON
+		t1.stu_id = t2.id
+		LEFT JOIN tb_erm_school_funded tf ON t1.funded_id =
+		tf.id
+		LEFT JOIN tb_erm_funded cf ON tf.funded_id = cf.id
+		LEFT JOIN
+		tb_erm_family t3 ON t2.family_id = t3.id
+		WHERE 1=1
+		<if test="status != null">
+			and t1.global_status= #{status,jdbcType=INTEGER}
+		</if>
+		<if test="schFundId != null">
+			AND t1.funded_id= #{schFundId,jdbcType=INTEGER}
+		</if>
+		<if test="stuId != null">
+			AND t1.stu_id = #{stuId,jdbcType=INTEGER}
+		</if>
+		<if test="diffLevel != null">
+			AND t2.diff_level = #{diffLevel,jdbcType=INTEGER}
+		</if>
+		<if test="flag != null">
+			AND t2.flag = #{flag,jdbcType=INTEGER}
+		</if>
+		<if test="isGraduated != null">
+			AND t2.is_graduation = #{isGraduated,jdbcType=INTEGER}
+		</if>
+		<if test="teacheThecked != null">
+			AND t2.head_teache_check = #{teacheThecked,jdbcType=INTEGER}
+		</if>
+		<if test="statusSet != null">
+			AND t1.global_status in
+			<foreach item="statusItem" collection="statusSet" open="("
+				separator="," close=")">
+				#{statusItem}
+			</foreach>
+		</if>
+		<if test="stuName != null and stuName != ''">
+			AND t2.name = #{stuName,jdbcType=VARCHAR}
+		</if>
+		<if test="age != null">
+			AND t2.age = #{age,jdbcType=INTEGER}
+		</if>
+		<if test="schId != null">
+			AND tf.school_id = #{schId,jdbcType=INTEGER}
+		</if>
+		<if test="year != null">
+			AND tf.year = #{year,jdbcType=INTEGER}
+		</if>
+	 	<if test="semester != null and semester != ''">
+			AND tf.semester = #{semester,jdbcType=VARCHAR}
+		</if>
+	 	<if test="schzone != null and schzone != ''">
+			AND tf.schzone = #{schzone,jdbcType=VARCHAR}
+		</if>
+		<if test="level != null and level != ''">
+			AND tf.level = #{level,jdbcType=VARCHAR}
+		</if>
+		<if test="idCard != null and idCard != ''">
+			AND t2.idcard = #{idCard,jdbcType=VARCHAR}
+		</if>
+		<if test="stuno != null and stuno != ''">
+			AND t2.stuno = #{stuno,jdbcType=VARCHAR}
+		</if>
+		<if test="grade != null and grade != ''">
+			AND t2.grade LIKE concat(concat('%',#{grade}),'%')
+		</if>
+		<if test="clazz != null and clazz != ''">
+			AND t2.clazz  LIKE concat(concat('%',#{clazz}),'%')
+		</if>
+		<if test="fundName != null and fundName != ''">
+			AND cf.name LIKE concat(concat('%',#{fundName}),'%')
+		</if>
+		<if test="fundId != null and fundId != ''">
+			AND cf.id =#{fundId}
+		</if>
+	</select>
+	
+	<select id="queryApply" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT
+		t1.*,
+		cf.name AS fundName,
+		t2.`name` stuName,
+		t2.school_id,
+		t2.birth,
+		t2.stuno,
+		t2.card_type,
+		t2.idcard,
+		t2.major,
+		t2.sch_system,
+		t2.pinyin,
+		t2.engname,
+		t2.start_year,
+		t2.age,
+		t2.zone,
+		t2.grade,
+		t2.study_type,
+		t2.stu_type,
+		t2.clazz,
+		t2.telphone,
+		t2.address,
+		t2.division_code,
+		t2.residence_type,
+		t2.nature,
+		t2.birth_place,
+		t2.city_code,
+		t2.marriage_status,
+		t2.health_status,
+		t2.political_status,
+		t2.nation,
+		t2.is_foreign,
+		t2.attending_type,
+		t2.learn_type,
+		t2.low_insurance,
+		t2.handicapped,
+		t2.consume_info,
+		t2.default_bankcard,
+		t2.actual_bankcard,
+		t2.creator,
+		t2.create_time,
+		t2.updator,
+		t2.update_time,
+		t2.addressType,
+		t2.account_type,
+		t2.school_name,
+		t2.school,
+		t2.is_poor,
+		CASE t2.gender WHEN 1
+		THEN '男' WHEN 2 THEN '女' END gender,
+		t3.address,
+		t3.father,
+		t3.mother,
+		t3.father_job fatherJob,
+		t3.mother_job
+		montherJob,
+		t3.phone,
+		t2.diff_level,
+		t2.head_teache_check,
+		t2.head_teache_name,
+		t2.flag,
+		t2.note,
+		t2.is_graduation,
+		CASE t2.diff_level WHEN 0
+		THEN '不困难' WHEN 1 THEN '困难' WHEN 2 THEN '一般困难' WHEN 3 THEN '特别困难' END diffLevelName,
+	    CASE
+		    t1.global_status    
+		    WHEN 14
+		    THEN '发放成功'
+		    WHEN 15
+		    THEN '发放成功'
+		 WHEN 32
+		    THEN '发放失败' 
+		    ELSE '尚未发放请等待' 
+		  END offeredStatus 
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_audit_log t ON t.funded_id = t1.id
+		LEFT JOIN tb_erm_student t2 ON
+		t1.stu_id = t2.id
+		LEFT JOIN tb_erm_school_funded tf ON t1.funded_id =
+		tf.id
+		LEFT JOIN tb_erm_funded cf ON tf.funded_id = cf.id
+		LEFT JOIN
+		tb_erm_family t3 ON t2.family_id = t3.id
+		WHERE 1=1
+		<if test="status != null">
+			and t.`status` = #{status,jdbcType=INTEGER}
+		</if>
+		<if test="schFundId != null">
+			AND t1.funded_id= #{schFundId,jdbcType=INTEGER}
+		</if>
+		<if test="stuId != null">
+			AND t1.stu_id = #{stuId,jdbcType=INTEGER}
+		</if>
+		<if test="school != null and school != ''">
+			AND t2.school like '%${school}%'
+		</if>
+		<if test="diffLevel != null">
+			AND t2.diff_level = #{diffLevel,jdbcType=INTEGER}
+		</if>
+		<if test="flag != null">
+			AND t2.flag = #{flag,jdbcType=INTEGER}
+		</if>
+		<if test="isGraduated != null">
+			AND t2.is_graduation = #{isGraduated,jdbcType=INTEGER}
+		</if>
+		<if test="teacheThecked != null">
+			AND t2.head_teache_check = #{teacheThecked,jdbcType=INTEGER}
+		</if>
+
+		<if test="minAge != null and minAge != ''">
+			and t2.age &gt; #{minAge}
+		</if>
+		<if test="maxAge != null and maxAge != ''">
+			and t2.age &lt; #{maxAge}
+		</if>
+
+		<if test="gender != null and gender != ''">
+			and t2. gender = #{gender}
+		</if>
+
+		<if test="isPoor != null and isPoor != ''">
+			and t2.is_poor = #{isPoor}
+		</if>
+		<if test="hasApplyImg != '' and hasApplyImg == 1 ">
+			and t2.family_id is not null
+		</if>
+		<if test="hasApplyImg != '' and hasApplyImg == 0 ">
+			and t2.family_id is null
+		</if>
+		<if test=" address != null and address != ''  ">
+			and t2.address like  concat(concat('%',#{address}),'%')
+		</if>
+
+		<if test="statusSet != null">
+			AND t1.global_status in
+			<foreach item="statusItem" collection="statusSet" open="("
+				separator="," close=")">
+				#{statusItem}
+			</foreach>
+		</if>
+		<if test="stuName != null and stuName != ''">
+			AND t2.name = #{stuName,jdbcType=VARCHAR}
+		</if>
+		<if test="age != null">
+			AND t2.age = #{age,jdbcType=INTEGER}
+		</if>
+		<if test="schId != null">
+			AND tf.school_id = #{schId,jdbcType=INTEGER}
+		</if>
+		<if test="year != null">
+			AND tf.year = #{year,jdbcType=INTEGER}
+		</if>
+	 	<if test="semester != null and semester != ''">
+			AND tf.semester = #{semester,jdbcType=VARCHAR}
+		</if>
+	 	<if test="schzone != null and schzone != ''">
+			AND tf.schzone = #{schzone,jdbcType=VARCHAR}
+		</if>
+		<if test="level != null and level != ''">
+			AND tf.level = #{level,jdbcType=VARCHAR}
+		</if>
+		<if test="idCard != null and idCard != ''">
+			AND t2.idcard = #{idCard,jdbcType=VARCHAR}
+		</if>
+		<if test="stuno != null and stuno != ''">
+			AND t2.stuno = #{stuno,jdbcType=VARCHAR}
+		</if>
+		<if test="grade != null and grade != ''">
+			AND t2.grade LIKE concat(concat('%',#{grade}),'%')
+		</if>
+		<if test="clazz != null and clazz != ''">
+			AND t2.clazz  LIKE concat(concat('%',#{clazz}),'%')
+		</if>
+		<if test="fundName != null and fundName != ''">
+			AND cf.name LIKE concat(concat('%',#{fundName}),'%')
+		</if>
+		<if test="fundId != null and fundId != ''">
+			AND cf.id =#{fundId}
+		</if>
+		order by t1.score desc
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	<select id="queryApplyCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT
+		count(1)
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_audit_log t ON t.funded_id = t1.id
+		LEFT JOIN tb_erm_student t2 ON
+		t1.stu_id = t2.id
+		LEFT JOIN tb_erm_school_funded tf ON t1.funded_id =
+		tf.id
+		LEFT JOIN tb_erm_funded cf ON tf.funded_id = cf.id
+		LEFT JOIN
+		tb_erm_family t3 ON t2.family_id = t3.id
+		WHERE 1=1
+		<if test="status != null">
+			and t.`status` = #{status,jdbcType=INTEGER}
+		</if>
+		<if test="schFundId != null">
+			AND t1.funded_id= #{schFundId,jdbcType=INTEGER}
+		</if>
+		<if test="stuId != null">
+			AND t1.stu_id = #{stuId,jdbcType=INTEGER}
+		</if>
+		<if test="diffLevel != null">
+			AND t2.diff_level = #{diffLevel,jdbcType=INTEGER}
+		</if>
+		<if test="flag != null">
+			AND t2.flag = #{flag,jdbcType=INTEGER}
+		</if>
+		<if test="isGraduated != null">
+			AND t2.is_graduation = #{isGraduated,jdbcType=INTEGER}
+		</if>
+		<if test="teacheThecked != null">
+			AND t2.head_teache_check = #{teacheThecked,jdbcType=INTEGER}
+		</if>
+
+		<if test="minAge != null and minAge != ''">
+			and t2.age &gt; #{minAge}
+		</if>
+		<if test="maxAge != null and maxAge != ''">
+			and t2.age &lt; #{maxAge}
+		</if>
+
+		<if test="gender != null and gender != ''">
+			and t2. gender = #{gender}
+		</if>
+
+		<if test="isPoor != null and isPoor != ''">
+			and t2.is_poor = #{isPoor}
+		</if>
+		<if test="hasApplyImg != '' and hasApplyImg == 1 ">
+			and t2.family_id is not null
+		</if>
+		<if test="hasApplyImg != '' and hasApplyImg == 0 ">
+			and t2.family_id is null
+		</if>
+		<if test=" address != null and address != ''  ">
+			and t2.address like  concat(concat('%',#{address}),'%')
+		</if>
+		<if test="statusSet != null">
+			AND t1.global_status in
+			<foreach item="statusItem" collection="statusSet" open="("
+				separator="," close=")">
+				#{statusItem}
+			</foreach>
+		</if>
+		<if test="stuName != null and stuName != ''">
+			AND t2.name = #{stuName,jdbcType=VARCHAR}
+		</if>
+		<if test="age != null">
+			AND t2.age = #{age,jdbcType=INTEGER}
+		</if>
+		<if test="schId != null">
+			AND tf.school_id = #{schId,jdbcType=INTEGER}
+		</if>
+		<if test="year != null">
+			AND tf.year = #{year,jdbcType=INTEGER}
+		</if>
+	 	<if test="semester != null and semester != ''">
+			AND tf.semester = #{semester,jdbcType=VARCHAR}
+		</if>
+	 	<if test="schzone != null and schzone != ''">
+			AND tf.schzone = #{schzone,jdbcType=VARCHAR}
+		</if>
+		<if test="level != null and level != ''">
+			AND tf.level = #{level,jdbcType=VARCHAR}
+		</if>
+		<if test="idCard != null and idCard != ''">
+			AND t2.idcard = #{idCard,jdbcType=VARCHAR}
+		</if>
+		<if test="stuno != null and stuno != ''">
+			AND t2.stuno = #{stuno,jdbcType=VARCHAR}
+		</if>
+		<if test="grade != null and grade != ''">
+			AND t2.grade LIKE concat(concat('%',#{grade}),'%')
+		</if>
+		<if test="clazz != null and clazz != ''">
+			AND t2.clazz  LIKE concat(concat('%',#{clazz}),'%')
+		</if>
+		<if test="fundName != null and fundName != ''">
+			AND cf.name LIKE concat(concat('%',#{fundName}),'%')
+		</if>
+		<if test="fundId != null and fundId != ''">
+			AND cf.id =#{fundId}
+		</if>
+	</select>
+
+</mapper>

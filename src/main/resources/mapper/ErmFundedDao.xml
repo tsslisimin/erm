@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmFundedDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmFundedEntity" id="ermFundedMap">
+		<result property="schFundId" column="schFundId" />
+		<result property="schzone" column="schzone" />
+		<result property="level" column="level" />
+		<result property="schoolName" column="schoolName" />
+		<result property="schoolId" column="schoolId" />
+		<result property="formUrl" column="formUrl" />
+		<result property="id" column="id" />
+		<result property="type" column="type" />
+		<result property="subtype" column="subtype" />
+		<result property="name" column="name" />
+		<result property="ebId" column="eb_id" />
+		<result property="describ" column="describ" />
+		<result property="creator" column="creator" />
+		<result property="createTime" column="create_time" />
+		<result property="updator" column="updator" />
+		<result property="updateTime" column="update_time" />
+		<result property="status" column="status" />
+		<result property="year" column="year" />
+		<result property="semester" column="semester" />
+		<result property="publicStatus" column="public_status"/>
+		<result property="publicImg" column="public_img"/>
+	</resultMap>
+
+
+	<select id="queryObject" resultMap="ermFundedMap">
+		select * from tb_erm_funded
+		where id = #{value}
+	</select>
+
+    <select id="selectByNameAndSemester" resultMap="ermFundedMap">
+
+	select * from tb_erm_funded
+		where semester = #{semester} and name=#{name}
+
+	</select>
+	<select id="getReportOverview" resultType="java.util.Map">
+		SELECT
+		<if test="schoolId == null or schoolId == ''">
+			x.school_count school_count,
+		</if>
+		count(id) funded_count,
+		SUM(x.money_sum) money_sum,
+		SUM(x.stu_count)
+		stu_count
+		FROM
+		(
+		SELECT
+		*
+		FROM
+		tb_erm_funded t1
+		LEFT JOIN (
+		SELECT
+		count(DISTINCT school_id) school_count,
+		funded_id
+		FROM
+		tb_erm_school_funded
+		) t2 ON t2.funded_id = t1.id
+		LEFT JOIN (
+		SELECT
+		count(t1.stu_id) stu_count,
+		sum(t1.money) money_sum,
+		t2.funded_id
+		school_funded_id,
+		t2.school_id
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN
+		tb_erm_school_funded t2 ON t1.funded_id = t2.id
+		WHERE
+		t1.global_status
+		BETWEEN 10
+		AND 15
+		<if test="schoolId != null and schoolId != ''">
+			and t2.school_id = #{schoolId}
+		</if>
+		) t3 ON t1.id = t3.school_funded_id
+		WHERE 1=1
+		<if test="schoolId != null and schoolId != ''">
+			and id in(select DISTINCT funded_id from
+			tb_erm_school_funded where school_id = #{schoolId} and `status` !=
+			-1)
+		</if>
+		<if test="schoolId == null or schoolId == ''">
+			and t1.eb_id = #{ebId}
+		</if>
+		) x
+	</select>
+
+	<select id="queryList" resultMap="ermFundedMap">
+		select * from tb_erm_funded where 1=1
+		<if test="type != null"> and type = #{type}</if>
+		<if test="subtype != null"> and subtype = #{subtype}</if>
+		<if test="year != null"> and year = #{year}</if>
+		<if test="semester != null"> and semester = #{semester}</if>
+		<if test="ebId != null"> and eb_id = #{ebId}</if>
+		<if test="name != null"> and name = #{name}</if>
+		<if test="fundName != null"> and name like '%${fundName}%'</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+
+
+	<select id="queryTotalReportMapList" resultType="java.util.Map">
+		select * from tb_erm_funded t1
+		LEFT JOIN (select count(1)
+		total_stus,funded_id from tb_erm_funded_info group by funded_id ) t2
+		ON t2.funded_id = t1.id
+		LEFT JOIN (select sum(money)
+		total_money,funded_id from tb_erm_funded_info group by funded_id ) t4
+		ON t4.funded_id = t1.id
+		LEFT JOIN(select
+		t.funded_id,GROUP_CONCAT(CONCAT(t.type,":",t.ct,":",t.money))
+		schoolFunded from(
+		SELECT
+		IFNULL(count(1),0)
+		ct,t3.type,t1.funded_id,IFNULL(SUM(t1.money),0) money
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON t1.stu_id = t2.id
+		LEFT JOIN tb_erm_school t3 ON t2.school_id = t3.id
+		LEFT JOIN
+		tb_erm_funded t4 ON t1.funded_id = t4.id
+		where t4.name is not null
+		<if test="ebId != null"> and t1.eb_id = #{ebId}  </if>
+		GROUP BY t1.funded_id,t3.type) t GROUP BY
+		t.funded_id ) t3 ON t1.id =
+		t3.funded_id
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by t1.id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotalReportMapListTotal" resultType="int">
+		select
+		count(1) from tb_erm_funded t1
+		LEFT JOIN (select count(1)
+		total_funded,funded_id from tb_erm_funded_info group by funded_id ) t2
+		ON t2.funded_id = t1.id
+		LEFT JOIN (select sum(money)
+		total_money,funded_id from tb_erm_funded_info group by funded_id ) t4
+		ON t4.funded_id = t1.id
+		LEFT JOIN(select
+		t.funded_id,GROUP_CONCAT(CONCAT(t.type,":",t.ct,":",t.money))
+		schoolFunded from(
+		SELECT
+		IFNULL(count(1),0)
+		ct,t3.type,t1.funded_id,IFNULL(SUM(t1.money),0) money
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON t1.stu_id = t2.id
+		LEFT JOIN tb_erm_school t3 ON t2.school_id = t3.id
+		LEFT JOIN
+		tb_erm_funded t4 ON t1.funded_id = t4.id
+		where t4.name is not null
+		<if test="ebId != null"> and t1.eb_id = #{ebId}   </if>
+		GROUP BY t1.funded_id,t3.type) t GROUP BY
+		t.funded_id ) t3 ON t1.id =
+		t3.funded_id
+	</select>
+
+	<select id="queryListBySchoolId" resultMap="ermFundedMap">
+		select t1.id as schFundId,t1.form_url as formUrl, t1.schzone,t1.public_status,t1.public_img,t1.level, t2.* from
+		tb_erm_school_funded t1
+		LEFT JOIN tb_erm_funded
+		t2 ON t1.funded_id =
+		t2.id
+		where 1=1 and t1.status != -1
+		<if test="ebId != null"> and t2.eb_id = #{ebId}</if>
+		<if test="type != null"> and t2.type = #{type}</if>
+		<if test="year != null"> and t2.year = #{year}</if>
+		<if test="subtype != null"> and t2.subtype = #{subtype}</if>
+		<if test="schoolId != null"> and t1.school_id = #{schoolId} </if>
+		<if test="status != null"> and t1.status = #{status} </if>
+		<if test="notStatus != null"> and t1.status != #{notStatus} </if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by t1.id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryFundList" resultMap="ermFundedMap">
+		SELECT t1.id AS schFundId,t5.id AS schoolId,t5.name AS schoolName,t2.*
+		FROM tb_erm_school_funded t1
+		LEFT JOIN tb_erm_funded
+		t2 ON t1.funded_id
+		= t2.id
+		LEFT JOIN tb_erm_school t5
+		ON t1.school_id=t5.id
+		WHERE t1.status
+		= #{status}
+		AND EXISTS
+		(SELECT * FROM tb_erm_funded_info t4 LEFT JOIN
+		tb_erm_school_funded t3
+		ON t4.funded_id= t3.id WHERE t4.global_status
+		=#{status} )
+		<if test="ebId != null and ebId != ''"> and t2.eb_id = #{ebId}</if>
+		<if test="type != null and type != ''"> and t2.type = #{type}</if>
+		<if test="year != null and year != ''"> and t2.year = #{type}</if>
+		<if test="subtype != null and subtype != ''"> and t2.subtype = #{subtype}</if>
+		<if test="schoolId != null and schoolId != ''"> and t1.school_id = #{schoolId} </if>
+		<if test="schFundId != null and schFundId != ''"> and t1.id = #{schFundId} </if>
+		<if test="fundedId != null and fundedId != ''"> and t1.funded_id = #{fundedId} </if>
+
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by t1.id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryFundListTotal" resultType="int">
+		SELECT count(1) FROM tb_erm_school_funded t1
+		LEFT JOIN tb_erm_funded
+		t2
+		ON t1.funded_id = t2.id
+		LEFT JOIN tb_erm_school t5
+		ON t1.school_id=t5.id
+		WHERE t1.status = #{status}
+		AND EXISTS
+		(SELECT * FROM tb_erm_funded_info
+		t4 LEFT JOIN
+		tb_erm_school_funded t3
+		ON t4.funded_id= t3.id WHERE
+		t4.global_status =#{status} )
+		<if test="ebId != null and ebId != ''"> and t2.eb_id = #{ebId}</if>
+		<if test="type != null and type != ''"> and t2.type = #{type}</if>
+		<if test="year != null and year != ''"> and t2.year = #{year}</if>
+		<if test="subtype != null and subtype != ''"> and t2.subtype = #{subtype}</if>
+		<if test="schoolId != null and schoolId != ''"> and t1.school_id = #{schoolId} </if>
+		<if test="schFundId != null and schFundId != ''"> and t1.id = #{schFundId} </if>
+		<if test="fundedId != null and fundedId != ''"> and t1.funded_id = #{fundedId} </if>
+
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		tb_erm_funded where 1=1
+		<if test="type != null"> and type = #{type}</if>
+		<if test="subtype != null"> and subtype = #{subtype}</if>
+		<if test="year != null"> and year = #{year}</if>
+		<if test="semester != null"> and semester = #{semester}</if>
+		<if test="ebId != null"> and eb_id = #{ebId}</if>
+		<if test="name != null"> and name = #{name}</if>
+		<if test="fundName != null"> and name like '%${fundName}%'</if>
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmFundedEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_funded
+		(
+		`type`,
+		`subtype`,
+		`name`,
+		`eb_id`,
+		`describ`,
+		`creator`,
+		`create_time`,
+		`updator`,
+		`update_time`,
+		`status`,
+		`year`,
+		`semester`
+		)
+		values
+		(
+		#{type},
+		#{subtype},
+		#{name},
+		#{ebId},
+		#{describ},
+		#{creator},
+		#{createTime},
+		#{updator},
+		#{updateTime},
+		#{status},
+		#{year},
+		#{semester}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmFundedEntity">
+		update tb_erm_funded
+		<set>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="subtype != null">`subtype` = #{subtype}, </if>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="ebId != null">`eb_id` = #{ebId}, </if>
+			<if test="describ != null">`describ` = #{describ}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime},</if>
+			<if test="year != null">`year` = #{year},</if>
+			<if test="semester != null">`semester` = #{semester}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from tb_erm_funded where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from tb_erm_funded where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

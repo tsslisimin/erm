@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmAccountDao">
+<select id="queryList">
+	select * from `tb_erm_accout` limit #{offset},#{limit}
+-- 	select *from  `tb_erm_accout` where  id= #{value}
+</select>
+
+
+</mapper>

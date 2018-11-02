@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmSchoolFundedDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmSchoolFundedEntity"
+		id="ermSchoolFundedMap">
+		<result property="creator" column="creator" />
+		<result property="createTime" column="create_time" />
+		<result property="updator" column="updator" />
+		<result property="updateTime" column="update_time" />
+		<result property="id" column="id" />
+		<result property="fundedId" column="funded_id" />
+		<result property="schoolId" column="school_id" />
+		<result property="schzone" column="schzone" />
+		<result property="level" column="level" />
+		<result property="count" column="count" />
+		<result property="totalMoney" column="total_money" />
+		<result property="formUrl" column="form_url" />
+		<result property="year" column="year" />
+		<result property="semester" column="semester" />
+		<result property="status" column="status" />
+		<result property="startdate" column="startDate" />
+		<result property="enddate" column="endDate" />
+		<result property="note" column="note" />
+		<result property="publicUrl" column="public_url" />
+		<result property="publicDate" column="public_date" />
+		<result property="publicStatus" column="public_status" />
+		<result property="publicImg" column="public_img" />
+		<association property="school" column="school_id" select="getSchool" />
+		<association property="funded" column="funded_id" select="getFunded" />
+		
+	</resultMap>
+
+	<select id="getSchool" parameterType="int"
+		resultType="com.coomia.erm.entity.ErmSchoolEntity">
+		select * from tb_erm_school where id =#{id}
+	</select>
+
+	<select id="getFunded" parameterType="int"
+		resultType="com.coomia.erm.entity.ErmFundedEntity">
+		select * from tb_erm_funded where id =#{id}
+	</select>
+
+	<select id="queryObject" resultMap="ermSchoolFundedMap">
+		select * from
+		tb_erm_school_funded where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="ermSchoolFundedMap">
+		select * from tb_erm_school_funded where 1 = 1 
+		<if test="status != null ">and status = #{status} </if>
+		<if test="fundedId != null"> and funded_id = #{fundedId}</if>
+		<if test="schoolId != null"> and school_id = #{schoolId}</if>
+		<if test="schzone != null"> and schzone = #{schzone}</if>
+		<if test="level != null"> and level = #{level}</if>
+		<if test="type != null and type != '' and subtype != null and subtype != ''">and funded_id in(select id from tb_erm_funded where 1=1 and 
+			type = #{type} and subtype=#{subtype})</if>
+		<if test="type != null and type != '' ">and funded_id in(select id from tb_erm_funded where 1=1 and 
+			type = #{type} )</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		tb_erm_school_funded where 1 = 1  
+		<if test="status != null ">and status = #{status} </if>
+		<if test="fundedId != null"> and funded_id = #{fundedId}</if>
+		<if test="schoolId != null"> and school_id = #{schoolId}</if>
+		<if test="schzone != null"> and schzone = #{schzone}</if>
+		<if test="level != null"> and level = #{level}</if>
+		<if test="type != null and type != '' and subtype != null and subtype != ''">and funded_id in(select id from tb_erm_funded where 1=1 and 
+			type = #{type} and subtype=#{subtype})</if>
+		<if test="type != null and type != '' ">and funded_id in(select id from tb_erm_funded where 1=1 and 
+			type = #{type} )</if>
+		 
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmSchoolFundedEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_school_funded
+		(
+		`creator`,
+		`create_time`,
+		`updator`,
+		`update_time`,
+		`funded_id`,
+		`school_id`,
+		`schzone`,
+		`level`,
+		`count`,
+		`form_url`,
+		`total_money`,
+		`year`,
+		`semester`,
+		`status`,
+		`startDate`,
+		`endDate`,
+		`note`,
+		`public_url`,
+		`public_date`,
+		`public_status`,
+		`public_img`
+		)
+		values
+		(
+		#{creator},
+		#{createTime},
+		#{updator},
+		#{updateTime},
+		#{fundedId},
+		#{schoolId},
+		#{schzone},
+		#{level},
+		#{count},
+		#{formUrl},
+		#{totalMoney},
+		#{year},
+		#{semester},
+		#{status},
+		#{startdate},
+		#{enddate},
+		#{note},
+		#{publicUrl},
+		#{publicDate},
+		#{publicStatus},
+		#{publicImg}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmSchoolFundedEntity">
+		update tb_erm_school_funded
+		<set>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}, </if>
+			<if test="fundedId != null">`funded_id` = #{fundedId}, </if>
+			<if test="schoolId != null">`school_id` = #{schoolId}, </if>
+			<if test="schzone != null">`schzone` = #{schzone}, </if>
+			<if test="level != null">`level` = #{level}, </if>
+			<if test="count != null">`count` = #{count}, </if>
+			<if test="formUrl != null">`form_url` = #{formUrl}, </if>
+			<if test="totalMoney != null">`total_money` = #{totalMoney}, </if>
+			<if test="year != null">`year` = #{year}, </if>
+			<if test="semester != null">`semester` = #{semester}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="startdate != null">`startDate` = #{startdate}, </if>
+			<if test="enddate != null">`endDate` = #{enddate},</if>
+			<if test="note != null">`note` = #{note},</if>
+			<if test="publicUrl != null">`public_url` = #{publicUrl},</if>
+			<if test="publicDate != null">`public_date` = #{publicDate},</if>
+			<if test="publicStatus != null">`public_status` = #{publicStatus},</if>
+			<if test="publicImg != null">`public_img` = #{publicImg}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from tb_erm_school_funded where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from tb_erm_school_funded where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="queryObjectByStuFundId" resultMap="ermSchoolFundedMap">
+		SELECT schfund.*
+		FROM tb_erm_school_funded schfund JOIN tb_erm_funded_info stufund ON
+		schfund.id = stufund.funded_id WHERE stufund.id = #{value}
+	</select>
+
+	<select id="queryObjectByFundId" resultMap="ermSchoolFundedMap"
+		parameterType="java.util.Map">
+		SELECT schFund.* FROM tb_erm_school_funded schFund WHERE 1=1
+
+		<if test="schoolId  !=null">
+			AND schFund.school_id = #{schoolId,jdbcType=INTEGER}
+		</if>
+		<if test="fundId  !=null">
+			AND schFund.funded_id= #{fundId,jdbcType=INTEGER}
+		</if>
+		<if test="year !=null">
+			AND schFund.year= #{year,jdbcType=INTEGER}
+		</if>
+		<if test="schzone !=null and schzone != ''">
+			AND schFund.schzone= #{schzone}
+		</if>
+		<if test="level !=null and level != ''">
+			AND schFund.level= #{level}
+		</if>
+		<if test="semester !=null and semester != ''">
+			AND schFund.semester= #{semester}
+		</if>
+		<if test="id !=null">
+			AND schFund.id= #{id}
+		</if>
+	</select>
+
+	<select id="querySchFundList" resultMap="ermSchoolFundedMap"
+		parameterType="java.util.Map">
+		SELECT schFund.* FROM tb_erm_school_funded schFund
+		LEFT JOIN
+		tb_erm_funded fund ON schFund.funded_id=fund.id
+		WHERE 1=1 and schFund.status != -1
+		<if test="year != null and year != ''">
+			AND schFund.year= #{year,jdbcType=INTEGER}
+		</if>
+		<if test="schoolId !=null and schoolId != ''">
+			AND schFund.school_id= #{schoolId,jdbcType=INTEGER}
+		</if>
+		<if test="schzone !=null and schzone != ''">
+			AND schFund.schzone= #{schzone}
+		</if>
+		<if test="level !=null and level != ''">
+			AND schFund.level= #{level}
+		</if>
+		<if test="fundId !=null and fundId != ''">
+			AND schFund.funded_id= #{fundId,jdbcType=INTEGER}
+		</if>
+		<if test="ebId != null and ebId != ''">
+			AND fund.eb_id=#{ebId,jdbcType=INTEGER}
+		</if>
+		<if test="type != null and type != ''">
+			AND fund.type= #{type,jdbcType=INTEGER}
+		</if>
+		<if test="fundName != null and fundName != ''">
+			AND (fund.name LIKE concat(concat('%',#{fundName}),'%') or
+			fund.id = #{fundName})
+		</if>
+		<if test="status != null and status != ''">
+			and schFund.status = #{status}
+		</if>
+		<if test="id != null and id != ''">
+			and schFund.id = #{id}
+		</if>
+		<if test="fundNotStatus != null and fundNotStatus != ''">
+			and schFund.status != #{fundNotStatus}
+		</if>
+
+	</select>
+
+	<select id="querySchFundListTotal" resultType="int"
+		parameterType="java.util.Map">
+		SELECT count(1) FROM tb_erm_school_funded schFund
+		LEFT JOIN
+		tb_erm_funded fund ON schFund.funded_id=fund.id
+		WHERE 1=1
+		<if test="year != null and year != ''">
+			AND schFund.year= #{year,jdbcType=INTEGER}
+		</if>
+		<if test="schoolId  !=null and schoolId != ''">
+			AND schFund.school_id= #{schoolId,jdbcType=INTEGER}
+		</if>
+		<if test="schzone  !=null and schzone != ''">
+			AND schFund.schzone= #{schzone}
+		</if>
+		<if test="level  !=null and level != ''">
+			AND schFund.level= #{level}
+		</if>
+		<if test="fundId  !=null and fundId != ''">
+			AND schFund.funded_id= #{fundId,jdbcType=INTEGER}
+		</if>
+		<if test="ebId != null and ebId != ''">
+			AND fund.eb_id=#{ebId,jdbcType=INTEGER}
+		</if>
+		<if test="type != null and type != ''">
+			AND fund.type= #{type,jdbcType=INTEGER}
+		</if>
+		<if test="fundName != null and fundName != ''">
+			AND (fund.name LIKE concat(concat('%',#{fundName}),'%') or
+			fund.id = #{fundName})
+		</if>
+		<if test="status != null and status != ''">
+			and schFund.status = #{status}
+		</if>
+		<if test="fundNotStatus != null and fundNotStatus != ''">
+			and schFund.status != #{fundNotStatus}
+		</if>
+		<if test="id != null and id != ''">
+			and schFund.id = #{id}
+		</if>
+
+	</select>
+
+</mapper>

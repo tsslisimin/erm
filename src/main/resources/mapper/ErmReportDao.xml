@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmReportDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.coomia.erm.entity.ErmReportEntity" id="ermReportMap">
+        <result property="id" column="id"/>
+        <result property="reportName" column="report_name"/>
+        <result property="reportDesc" column="report_desc"/>
+        <result property="schId" column="sch_id"/>
+        <result property="reportType" column="report_type"/>
+        <result property="reportYear" column="report_year"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="fundId" column="fund_id"/>
+        <result property="createDate" column="create_date"/>
+        <result property="creator" column="creator"/>
+       	<association property="school" column="sch_id" select="getSchool"/>   
+    </resultMap>
+    
+     <select id="getSchool" parameterType="int" resultType="com.coomia.erm.entity.ErmSchoolEntity">
+        select * from tb_erm_school where id =#{id}
+    </select>
+
+	<select id="queryObject" resultMap="ermReportMap">
+		select * from tb_erm_report where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="ermReportMap">
+		select * from tb_erm_report where 1 = 1
+		and report_year is not null
+		<if test="schoolId != null and schoolId != '' "  >
+			and sch_id = #{schoolId}
+		</if>
+		<if test="reportTypes != null and reportTypes != ''">
+			and report_type in(${reportTypes})
+		</if>
+		<if test="year != null and year != ''">
+			and report_year = #{year}
+		</if>
+		<if test = "type != null and type != ''">
+			and report_type = #{type}
+		</if>
+		<if test = "fundedId != null and fundedId != ''">
+			and fund_id = #{fundedId}
+		</if>
+		<if test = "group != null and group != ''">
+			GROUP BY  ${group}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(1) from (select count(*) from tb_erm_report  where 1=1 
+		and report_year is not null
+		<if test="schoolId != null and schoolId != '' "  >
+			and sch_id = #{schoolId}
+		</if>
+		<if test="reportTypes != null and reportTypes != ''">
+			and report_type in(${reportTypes})
+		</if>
+		<if test="year != null and year != ''">
+			and report_year = #{year}
+		</if>
+		<if test = "type != null and type != ''">
+			and report_type = #{type}
+		</if>
+		<if test = "fundedId != null and fundedId != ''">
+			and fund_id = #{fundedId}
+		</if>
+		<if test = "group != null and group != ''">
+			GROUP BY  ${group}
+		</if>
+		) t
+	</select>
+	 
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmReportEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_report
+		(
+			`report_name`, 
+			`report_desc`, 
+			`sch_id`, 
+			`report_type`, 
+			`report_year`, 
+			`creator_id`, 
+			`fund_id`, 
+			`create_date`, 
+			`creator`
+		)
+		values
+		(
+			#{reportName}, 
+			#{reportDesc}, 
+			#{schId}, 
+			#{reportType}, 
+			#{reportYear}, 
+			#{creatorId}, 
+			#{fundId}, 
+			#{createDate}, 
+			#{creator}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.coomia.erm.entity.ErmReportEntity">
+		update tb_erm_report 
+		<set>
+			<if test="reportName != null">`report_name` = #{reportName}, </if>
+			<if test="reportDesc != null">`report_desc` = #{reportDesc}, </if>
+			<if test="schId != null">`sch_id` = #{schId}, </if>
+			<if test="reportType != null">`report_type` = #{reportType}, </if>
+			<if test="reportYear != null">`report_year` = #{reportYear}, </if>
+			<if test="creatorId != null">`creator_id` = #{creatorId}, </if>
+			<if test="fundId != null">`fund_id` = #{fundId}, </if>
+			<if test="createDate != null">`create_date` = #{createDate}, </if>
+			<if test="creator != null">`creator` = #{creator}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_erm_report where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_erm_report where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	
+	<select id="queryFundGroupbyType" resultType="java.util.Map" parameterType="map">
+		SELECT fund.type type, COUNT(info.id) fundCount FROM tb_erm_funded_info info LEFT JOIN tb_erm_school_funded schoolFund ON info.funded_id=schoolFund.id 
+			LEFT JOIN tb_erm_funded fund ON schoolFund.funded_id=fund.id 
+			WHERE 1=1 
+			<if test="year != null and year != ''">
+					AND schoolFund.year = #{year}
+			</if>
+			<if test="ebId != null and ebId != ''">
+					AND fund.eb_id= #{ebId}
+			</if>
+			GROUP BY fund.type
+	</select>
+	
+	<select id="queryFundGroupbySchool" resultType="java.util.Map" parameterType="map">
+		SELECT schoolFund.school_id schId, COUNT(info.id) fundCount FROM tb_erm_funded_info info LEFT JOIN tb_erm_school_funded schoolFund ON info.funded_id=schoolFund.id 
+			LEFT JOIN tb_erm_funded fund ON schoolFund.funded_id=fund.id 
+			WHERE 1=1 
+				<if test="year != null and year != ''">
+					AND schoolFund.year = #{year}
+				</if>
+			<if test="ebId != null and ebId != ''">
+					AND fund.eb_id= #{ebId}
+			</if>
+			GROUP BY schoolFund.school_id
+	</select>
+
+</mapper>

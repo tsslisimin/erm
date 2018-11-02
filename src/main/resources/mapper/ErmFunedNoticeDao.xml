@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmFunedNoticeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmFunedNoticeEntity"
+		id="ermFunedNoticeMap">
+		<result property="id" column="id" />
+		<result property="title" column="title" />
+		<result property="url" column="url" />
+		<result property="describ" column="describ" />
+		<result property="type" column="type" />
+		<result property="creator" column="creator" />
+		<result property="createTime" column="create_time" />
+		<result property="updator" column="updator" />
+		<result property="updateTime" column="update_time" />
+		<result property="schools" column="schools" />
+	</resultMap>
+
+	<select id="queryObject" resultMap="ermFunedNoticeMap">
+		select * from
+		tb_erm_funed_notice where id = #{value}
+	</select>
+
+	<sql id="queryByAdminId">
+		select notice_id from tb_erm_admin_notice where admin_id =
+		#{adminId}
+	</sql>
+
+	<select id="queryList" resultMap="ermFunedNoticeMap">
+		select * from (select * from tb_erm_funed_notice where 1 = 1
+		<if test="adminId != null and adminId != ''">
+			<if test="typex.size > 1">
+				and id in(
+				<include refid="queryByAdminId"></include>
+				) 
+			</if>
+			OR schools IS NULL OR schools = ''
+		</if>
+		<if test="typex != null">
+			and type in (
+			<foreach collection="typex"  item="item" separator=",">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		) t where 1=1 
+			<if test="todo == null or todo == ''">
+				and type in (
+				<foreach collection="typex"  item="item" separator="," >
+					#{item}
+				</foreach>
+				)
+			</if>
+			<if test="todo != null and todo != ''">
+				and t.type in (5,6,7)
+			</if>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(1) from (select * from
+		tb_erm_funed_notice
+		where 1 = 1
+		<if test="adminId != null and adminId != ''">
+			<if test="typex.size > 1">
+					and id in(
+					<include refid="queryByAdminId"></include>
+					) 
+			</if>
+			OR schools IS NULL OR schools = ''
+		</if>
+		<if test="typex != null">
+			and type in (
+			<foreach collection="typex"  item="item" separator="," >
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="type != null ">
+			and type = #{type}
+		</if>
+		) t  where 1=1 
+		<if test="todo == null or todo == ''">
+			and type in (
+			<foreach collection="typex"  item="item" separator=",">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="todo != null and todo != ''">
+			and t.type in (5,6,7)
+		</if>
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmFunedNoticeEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_funed_notice
+		(
+		`title`,
+		`url`,
+		`describ`,
+		`type`,
+		`creator`,
+		`create_time`,
+		`updator`,
+		`update_time`,
+		`schools`
+
+		)
+		values
+		(
+		#{title},
+		#{url},
+		#{describ},
+		#{type},
+		#{creator},
+		#{createTime},
+		#{updator},
+		#{updateTime},
+		#{schools}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmFunedNoticeEntity">
+		update tb_erm_funed_notice
+		<set>
+			<if test="title != null">`title` = #{title}, </if>
+			<if test="url != null">`url` = #{url}, </if>
+			<if test="describ != null">`describ` = #{describ}, </if>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}</if>
+			<if test="schools != null">`schools` = #{schools}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from tb_erm_funed_notice where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from tb_erm_funed_notice where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="queryNoticesByCreator" resultMap="ermFunedNoticeMap"
+		parameterType="java.util.Map">
+		select * from tb_erm_funed_notice where 1=1
+		<if test="creator!=null">
+			and creator=#{creator}
+		</if>
+		<if test="type!=null">
+			and type=#{type}
+		</if>
+		order by id desc
+
+	</select>
+
+	<!-- <select id="queryNoticesByCreator" resultMap="ermFunedNoticeMap" parameterType="java.lang.String"> 
+		SELECT note.* FROM tb_erm_funed_notice note JOIN tb_erm_admin_notice anote 
+		ON note.id = anote.notice_id WHERE anote.admin_id = (SELECT id FROM tb_erm_admin 
+		admin WHERE admin.username=#{username}) </select> -->
+
+</mapper>

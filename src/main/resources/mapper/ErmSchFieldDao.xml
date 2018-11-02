@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmSchFieldDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmSchFieldEntity" id="ermSchFieldMap">
+		<result property="id" column="id" />
+		<result property="schId" column="sch_id" />
+		<result property="fieldId" column="field_id" />
+		<result property="weight" column="weight" />
+		<result property="flag" column="flag" />
+	</resultMap>
+
+	<select id="queryObject" resultMap="ermSchFieldMap">
+		select * from
+		tb_erm_sch_field where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="ermSchFieldMap">
+		select * from tb_erm_sch_field where 1 = 1
+		<if test="schId != null">
+			and sch_id = #{schId}
+		</if>
+		<if test="flag != null">
+			and flag = #{flag}
+		</if>
+		<if test="fieldId != null">
+			and field_id = #{fieldId}
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		tb_erm_sch_field  where 1 = 1
+		<if test="schId != null">
+			and sch_id = #{schId}
+		</if>
+		<if test="flag != null">
+			and flag = #{flag}
+		</if>
+		<if test="fieldId != null">
+			and field_id = #{fieldId}
+		</if>
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmSchFieldEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_sch_field
+		(
+		`sch_id`,
+		`field_id`,
+		`flag`,
+		`weight`
+		)
+		values
+		(
+		#{schId},
+		#{fieldId},
+		#{flag},
+		#{weight}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmSchFieldEntity">
+		update tb_erm_sch_field
+		<set>
+			<if test="schId != null">`sch_id` = #{schId}, </if>
+			<if test="fieldId != null">`field_id` = #{fieldId}, </if>
+			<if test="flag != null">`flag` = #{flag}, </if>
+			<if test="weight != null">`weight` = #{weight}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		update tb_erm_sch_field set flag =0 where id =
+		#{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		update tb_erm_sch_field set flag = 0 where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<delete id="activeBatch">
+		update tb_erm_sch_field set flag = 1 where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+
+	<select id="queryCount" resultType="int" parameterType="java.util.Map">
+		select count(*) from
+		tb_erm_sch_field where 1=1 
+		<if test="schId != null and schId != ''">
+		and sch_id = #{schId}
+		</if>
+		<if test="flag != null and flag != ''">
+		and flag = #{flag}
+		</if>
+	</select>
+
+	<select id="querySchFields" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT rela.*, f.field_code,f.field_name FROM
+		tb_erm_sch_field rela JOIN tb_erm_field f ON rela.field_id=f.id
+		WHERE 1=1
+		<if test="schId != null and schId != ''">
+			AND rela.sch_id=#{schId,jdbcType=INTEGER}
+		</if>
+		<if test="flag != null and flag != ''">
+			AND rela.flag=#{flag,jdbcType=INTEGER}
+		</if>
+
+	</select>
+</mapper>

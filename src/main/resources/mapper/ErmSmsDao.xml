@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmSmsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmSmsEntity" id="ermSmsMap">
+		<result property="id" column="id" />
+		<result property="telephone" column="telephone" />
+		<result property="code" column="code" />
+		<result property="status" column="status" />
+		<result property="createDate" column="create_date" />
+		<result property="updateDate" column="update_date" />
+	</resultMap>
+
+	<select id="queryObject" resultMap="ermSmsMap">
+		select * from tb_erm_sms
+		where id = #{value}
+	</select>
+	<select id="queryObjectByCode" resultMap="ermSmsMap">
+		select * from
+		tb_erm_sms where telephone = #{telephone} and code = #{code} and
+		status = 0
+	</select>
+
+	<select id="queryList" resultMap="ermSmsMap">
+		select * from tb_erm_sms
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		tb_erm_sms
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmSmsEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_sms
+		(
+		`telephone`,
+		`code`,
+		`status`,
+		`create_date`,
+		`update_date`
+		)
+		values
+		(
+		#{telephone},
+		#{code},
+		#{status},
+		#{createDate},
+		#{updateDate}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmSmsEntity">
+		update tb_erm_sms
+		<set>
+			<if test="telephone != null">`telephone` = #{telephone}, </if>
+			<if test="code != null">`code` = #{code}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="createDate != null">`create_date` = #{createDate}, </if>
+			<if test="updateDate != null">`update_date` = #{updateDate}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from tb_erm_sms where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from tb_erm_sms where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

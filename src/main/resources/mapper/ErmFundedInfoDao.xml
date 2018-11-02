@@ -1,0 +1,988 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmFundedInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmFundedInfoEntity"
+		id="ermFundedInfoMap">
+		<result property="id" column="id" />
+		<result property="stuId" column="stu_id" />
+		<result property="fundedId" column="funded_id" />
+		<result property="globalStatus" column="global_status" />
+		<result property="money" column="money" />
+		<result property="fundedTime" column="funded_time" />
+		<result property="score" column="score" />
+		<result property="creator" column="creator" />
+		<result property="createTime" column="create_time" />
+		<result property="updator" column="updator" />
+		<result property="updateTime" column="update_time" />
+		<result property="suggestion" column="suggestion" />
+		<result property="applypicurl" column="applypicurl" />
+	</resultMap>
+
+
+	<sql id="conditionSql">
+		<if test="fundedId != null and fundedId != ''">
+			and funded_id =#{fundedId}
+		</if>
+		<if test="stuId != null and stuId != ''">
+			and stu_id = #{stuId}
+		</if>
+		<if test="globalStatus != null and globalStatus != ''">
+			and global_status = #{globalStatus}
+		</if>
+	</sql>
+
+	<select id="queryObject" resultMap="ermFundedInfoMap">
+		select * from
+		tb_erm_funded_info where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="ermFundedInfoMap">
+		select * from tb_erm_funded_info where 1=1
+		<include refid="conditionSql"></include>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryEBViewData" resultType="java.util.Map">
+		SELECT
+		t.type,t.stuCount,x.ct,x.auditCt
+		FROM
+		(
+		SELECT
+		count(t1.id) stuCount,
+		t2.type
+
+		FROM
+		tb_erm_student t1
+		LEFT JOIN tb_erm_school t2 ON t1.school_id
+		= t2.id
+		where t2.eb_id = #{ebId}
+		GROUP BY
+		t2.type
+		) t
+		LEFT JOIN (
+		SELECT
+		count(t1.stu_id) ct,
+		count(t6.stu_id) auditCt,
+		t3.type
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON t1.stu_id = t2.id
+		LEFT JOIN tb_erm_school t3 ON t2.school_id = t3.id
+		LEFT JOIN
+		tb_erm_school_funded t5 ON t1.funded_id = t5.id
+		LEFT JOIN tb_erm_funded
+		t4 ON t5.funded_id = t4.id
+		LEFT JOIN (
+		SELECT
+		*
+		FROM
+		tb_erm_funded_info
+		WHERE
+		global_status BETWEEN 10
+		AND 15
+		) t6 ON t1.id = t6.id
+		WHERE
+		t4. NAME
+		IS NOT NULL
+		and t3.eb_id = #{ebId}
+		) x ON
+		t.type = x.type
+		GROUP BY
+		x.type
+	</select>
+
+	<select id="queryStudentFundinfoList" resultType="java.util.Map">
+		SELECT
+		t1.global_status,
+		t1.money,
+		t3.`name`,
+		t3.type funded_type,
+		t4.dict_name
+		semester
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_school_funded t2 ON
+		t1.funded_id = t2.id
+		LEFT JOIN tb_erm_funded t3 ON t2.funded_id = t3.id
+		LEFT JOIN tb_erm_dict t4 ON t3.semester = t4.dict_code
+		left  join tb_erm_student t5 on  t1.stu_id=t5.id
+		WHERE
+		t5.idcard =#{idcard} and t5.name=#{name}
+	</select>
+
+	<select id="queryStudentFundinfoListTotal" resultType="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_school_funded t2 ON
+		t1.funded_id = t2.id
+		LEFT JOIN tb_erm_funded t3 ON t2.funded_id = t3.id
+		LEFT JOIN tb_erm_dict t4 ON t3.semester = t4.dict_code
+		WHERE
+		stu_id =
+		#{studentId}
+	</select>
+
+	<select id="queryFundedInfoMapList" resultType="java.util.Map">
+		SELECT
+		t1.id,
+		t1.stu_id,
+		t2.`name`,
+		t2.age,
+		t2.stuno,
+		t7.`name` school_name,
+		t7.type
+		school_type,
+		CASE t2.gender WHEN 1 THEN '男' WHEN 2 THEN '女' END
+		gender,
+		t2.birth,
+		t2.idcard,
+		t6.`year`,
+		t5.type funded_type,
+		t5.`name`
+		funded_name,
+		t1.funded_id,
+		t1.global_status,
+		t1.money,
+	  	t2.school,
+		t1.applypicurl,
+		case when t1.applypicurl IS NOT NULL then '有' else '无' end AS
+		hasApplyImg,
+		t3.fund_count,
+		t4.sum_money,
+		CONCAT('',t2.create_time)
+		create_time,
+		t2.parent_name,
+		t2.telphone,
+		t2.address,
+		t2.addressTown,
+		t2.addressTownship,
+		t2.addressGroup,
+		t2.grade,
+		t2.clazz,
+		t2.is_poor,
+		t2.actual_bankcard,
+		t2.semester start_year,
+		schfund.public_url,
+		t1.suggestion note,
+		t6.schzone,
+		t6.level,
+		schfund.semester
+		FROM
+		tb_erm_funded_info t1
+		LEFT
+		JOIN tb_erm_school_funded
+		schfund
+		ON
+		t1.funded_id = schfund.id
+		LEFT JOIN
+		tb_erm_student t2 ON
+		t1.stu_id =
+		t2.id
+		LEFT JOIN (select count(1)
+		fund_count,stu_id,funded_id
+		from
+		tb_erm_funded_info GROUP
+		BY stu_id ) t3
+		ON t3.stu_id = t2.id
+		LEFT
+		JOIN
+		(select sum(money) sum_money,stu_id from
+		tb_erm_funded_info
+		GROUP BY
+		stu_id) t4 ON t4.stu_id = t2.id
+		LEFT JOIN
+		tb_erm_school_funded t6 ON
+		t6.id
+		= t1.funded_id
+		LEFT JOIN tb_erm_funded
+		t5 ON
+		t6.funded_id = t5.id
+
+		LEFT JOIN tb_erm_school t7 ON t2.school_id =
+		t7.id
+		where
+		1 = 1
+		and
+		t5.name is
+		not null
+		<if test="status == null ">
+			and t1.global_status BETWEEN 11 AND 15
+		</if>
+		<if test="status != null and status != 0">
+			and t1.global_status = #{status}
+		</if>
+		<if test="name != null and name != ''">
+			and t2.name like '%${name}%'
+		</if>
+		<if test="address != null and address != ''">
+			and t2.address like '%${address}%'
+		</if>
+		<if test="isPoor != null and isPoor != ''">
+			and t2.is_poor = #{isPoor}
+		</if>
+		<if test="gender != null and gender != ''">
+			and t2.gender = #{gender}
+		</if>
+		<if test="grade != null and grade != ''">
+			and t2.grade like '%${grade}%'
+		</if>
+		<if test="school != null and school != ''">
+			AND t2.school like '%${school}%'
+		</if>
+		<!--<if test="diffLevel != null and diffLevel =='all'">-->
+			<!--and t2.diff_level != 0-->
+		<!--</if>-->
+		<if test="diffLevel != null and diffLevel !='all' ">
+			and t2.diff_level = #{diffLevel}
+		</if>
+		<if test="headTeachCheck != null and headTeachCheck != ''">
+			and t2.head_teache_check = #{headTeachCheck}
+		</if>
+		<if test="idcard != null and idcard != ''">
+			and t2.idcard like '%${idcard}%'
+		</if>
+		<if test="minAge != null and minAge != ''">
+			and t2.age &gt; #{minAge}
+		</if>
+		<if test="maxAge != null and maxAge != ''">
+			and t2.age &lt; #{maxAge}
+		</if>
+		<if test="schoolId != null and schoolId != ''">
+			and t2.school_id = #{schoolId}
+		</if>
+		<if test="isGraduation != null and isGraduation != ''">
+			and t2.is_graduation = #{isGraduation}
+		</if>
+		<if test="schFundId != null and schFundId != ''">
+			and t1.funded_id = #{schFundId}
+		</if>
+		<if test="schZone != null and schZone != ''">
+			and t6.schzone = #{schZone}
+		</if>
+		<if test="schZone != null and schZone != ''">
+			and t6.schzone = #{schZone}
+		</if>
+		<if test="schzone != null and schzone != ''">
+			and t6.schzone = #{schzone}
+		</if>
+		<if test="level != null and level != ''">
+			and t6.level = #{level}
+		</if>
+		<if test="fundId != null and fundId != ''">
+			and t6.funded_id = #{fundId}
+		</if>
+		<if test="year != null and year != ''">
+			and t6.year = #{year}
+		</if>
+		<if test="fundType != null and fundType != ''">
+			and t5.type = #{fundType}
+		</if>
+		<if test="subtype != null and subtype != ''">
+			and t5.subtype = #{subtype}
+		</if>
+		<if test="semester != null and semester != ''">
+			and t5.semester = #{semester}
+		</if>
+		<if test="schoolType != null and schoolType != ''">
+			and t7.type = #{schoolType}
+		</if>
+		<if test="hasApplyImg != '' and hasApplyImg == 1">
+			and t1.applypicurl IS NOT NULL
+		</if>
+		<if test="hasApplyImg != '' and hasApplyImg == 0">
+			and (t1.applypicurl IS NULL or applypicurl = '')
+		</if>
+		<if test="schFundedId != null and schFundedId != ''">
+			and t6.id = #{schFundedId}
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryFundedInfoMapListTotal" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON
+		t1.stu_id =
+		t2.id
+		LEFT JOIN (select count(1) fund_count,stu_id,funded_id
+		from
+		tb_erm_funded_info GROUP
+		BY stu_id ) t3 ON t3.stu_id = t2.id
+		LEFT
+		JOIN
+		(select sum(money) sum_money,stu_id from tb_erm_funded_info
+		GROUP
+		BY
+		stu_id) t4 ON t4.stu_id = t2.id
+		LEFT JOIN tb_erm_school_funded t6 ON
+		t6.id
+		= t1.funded_id
+		LEFT JOIN tb_erm_funded t5 ON
+		t6.funded_id = t5.id
+
+		LEFT JOIN tb_erm_school t7 ON t2.school_id = t7.id
+		where
+		1 = 1
+		and
+		t5.name is not null
+		<if test="status == null ">
+			and t1.global_status BETWEEN 10 AND 15
+		</if>
+		<if test="name != null and name != ''">
+			and t2.name like '%${name}%'
+		</if>
+		<if test="address != null and address != ''">
+			and t2.address like '%${address}%'
+		</if>
+		<if test="isPoor != null and isPoor != ''">
+			and t2.is_poor = #{isPoor}
+		</if>
+		<if test="gender != null and gender != ''">
+			and t2.gender = #{gender}
+		</if>
+		<if test="grade != null and grade != ''">
+			and t2.grade = #{grade}
+		</if>
+		<if test="stuno != null and stuno != ''">
+			and t2.stuno = #{stuno}
+		</if>
+		<if test="idcard != null and idcard != ''">
+			and t2.idcard like '%${idcard}%'
+		</if>
+		<if test="minAge != null and minAge != ''">
+			and t2.age &gt; #{minAge}
+		</if>
+		<if test="maxAge != null and maxAge != ''">
+			and t2.age &lt; #{maxAge}
+		</if>
+		<if test="schoolId != null and schoolId != ''">
+			and t2.school_id = #{schoolId}
+		</if>
+		<if test="schFundId != null and schFundId != ''">
+			and t1.funded_id = #{schFundId}
+		</if>
+		<if test="schZone != null and schZone != ''">
+			and t6.schzone = #{schZone}
+		</if>
+		<if test="diffLevel != null and diffLevel =='all'">
+			and t2.diff_level != 0
+		</if>
+		<if test="diffLevel != null and diffLevel !='all' ">
+			and t2.diff_level = #{diffLevel}
+		</if>
+		<if test="schzone != null and schzone != ''">
+			and t6.schzone = #{schzone}
+		</if>
+		<if test="level != null and level != ''">
+			and t6.level = #{level}
+		</if>
+		<if test="fundId != null and fundId != ''">
+			and t6.funded_id = #{fundId}
+		</if>
+		<if test="year != null and year != ''">
+			and t6.year = #{year}
+		</if>
+		<if test="fundType != null and fundType != ''">
+			and t5.type = #{fundType}
+		</if>
+		<if test="subtype != null and subtype != ''">
+			and t5.subtype = #{subtype}
+		</if>
+		<if test="semester != null and semester != ''">
+			and t5.semester = #{semester}
+		</if>
+		<if test="schoolType != null and schoolType != ''">
+			and t7.type = #{schoolType}
+		</if>
+		<if test="hasApplyImg == 1">
+			and t1.applypicurl IS NOT NULL
+		</if>
+		<if test="hasApplyImg = 0">
+			and (t1.applypicurl IS NULL or applypicurl = '')
+		</if>
+		<if test="schFundedId != null and schFundedId != ''">
+			and t6.id = #{schFundedId}
+		</if>
+	</select>
+
+	<select id="queryBaseStudentMapList" resultType="java.util.Map">
+		select
+		t2.`name`,
+		t2.age,
+		t2.stuno,
+		t1.`name` school_name,
+		t1.type
+		school_type,
+		CASE t2.gender WHEN 1 THEN '男' WHEN 2 THEN '女' END gender,
+		t2.birth,
+		t2.idcard,
+		t2.create_time,
+		t2.parent_name,
+		t2.telphone,
+		t2.address,
+		t2.addressTown,
+		t2.addressTownship,
+		t2.addressGroup,
+		t2.grade,
+		t2.clazz,
+		t2.actual_bankcard,
+		t2.start_year from
+		tb_erm_student
+		t2
+		LEFT JOIN
+		tb_erm_school t1 ON t2.school_id = t1.id
+		where 1 = 1
+		<if test="schoolId != null and schoolId != ''">
+			and t2.school_id = #{schoolId}
+		</if>
+		<if test="name != null and name != ''">
+			and t2.name like '%${name}%'
+		</if>
+		<if test="gender != null and gender != ''">
+			and t2.gender = #{gender}
+		</if>
+		<if test="isPoor != null and isPoor != ''">
+			and t2.isPoor = #{isPoor}
+		</if>
+		<if test="diffLevel != null and diffLevel != ''">
+			and t2.diffLevel = #{diffLevel}
+		</if>
+		<if test="idcard != null and idcard != ''">
+			and t2.idcard like '%${idcart}%'
+		</if>
+		<if test="minAge != null and minAge != ''">
+			and t2.age &gt;= #{minAge}
+		</if>
+		<if test="maxAge != null and maxAge != ''">
+			and t2.age &lt;= #{maxAge}
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryBaseStudentMapListTotal" resultType="int">
+		select
+		count(1)
+		from tb_erm_student t2
+		LEFT JOIN
+		tb_erm_school t1 ON
+		t2.school_id = t1.id
+		where 1 = 1
+		<if test="schoolId != null and schoolId != ''">
+			and t2.school_id = #{schoolId}
+		</if>
+		<if test="name != null and name != ''">
+			and t2.name like '%${name}%'
+		</if>
+		<if test="gender != null and gender != ''">
+			and t2.gender = #{gender}
+		</if>
+		<if test="idcard != null and idcard != ''">
+			and t2.idcard like '%${idcart}%'
+		</if>
+		<if test="minAge != null and minAge != ''">
+			and t2.age &gt;= #{minAge}
+		</if>
+		<if test="isPoor != null and isPoor != ''">
+			and t2.isPoor = #{isPoor}
+		</if>
+		<if test="diffLevel != null and diffLevel != ''">
+			and t2.diffLevel = #{diffLevel}
+		</if>
+		<if test="maxAge != null and maxAge != ''">
+			and t2.age &lt;= #{maxAge}
+		</if>
+	</select>
+
+	<select id="queryfundedSchoolReport" resultType="java.util.Map">
+		SELECT
+		SUM(t1.money) sum_money,
+		count(t1.stu_id) stu_count,
+		t3.`name`
+		school_name,
+		t3.type school_type,
+		t3.type school_type_id,
+		t4.`year`
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON t1.stu_id = t2.id
+		LEFT JOIN
+		tb_erm_school t3 ON t2.school_id = t3.id
+		LEFT JOIN
+		tb_erm_school_funded
+		t4 ON t4.id = t1.funded_id
+		LEFT JOIN tb_erm_funded
+		t5 ON
+		t4.funded_id =
+		t5.id
+		WHERE
+		t5. NAME IS NOT NULL
+		and t1.global_status
+		BETWEEN 10 and 15
+		<if test="schoolType != null and schoolType != ''">
+			and t3.type = #{schoolType}
+		</if>
+		<if test="schoolId != null and schoolId != ''">
+			and t3.id = #{schoolId}
+		</if>
+		<if test="year != null and year != ''">
+			and t4.year = #{year}
+		</if>
+		GROUP BY
+		t4. YEAR,
+		t3.${groupByField}
+		<if test="type != null"> and type = #{type}</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by t1.id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryfundedSchoolReportTotal" resultType="int">
+		select count(1) from (SELECT
+		SUM(t1.money) sum_money,
+		count(t1.stu_id)
+		stu_count,
+		t3.`name`
+		school_name,
+		t3.type school_type,
+		t4.`year`
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON t1.stu_id = t2.id
+		LEFT JOIN
+		tb_erm_school t3 ON t2.school_id = t3.id
+		LEFT JOIN
+		tb_erm_school_funded
+		t4 ON t4.id = t1.funded_id
+		LEFT JOIN tb_erm_funded
+		t5 ON
+		t4.funded_id = t5.id
+		WHERE
+		t5. NAME IS NOT NULL
+		and t1.global_status
+		BETWEEN 10 and 15
+		<if test="schoolType != null and schoolType != ''">
+			and t3.type = #{schoolType}
+		</if>
+		<if test="schoolId != null and schoolId != ''">
+			and t3.id = #{schoolId}
+		</if>
+		<if test="year != null and year != ''">
+			and t4.year = #{year}
+		</if>
+		GROUP BY
+		t4. YEAR,
+		t3.${groupByField}) t
+	</select>
+
+	<select id="queryfundedTypeReport" resultType="java.util.Map">
+		SELECT
+		SUM(t1.money) sum_money,
+		count(t1.stu_id) stu_count,
+		t5.type
+		funded_type,
+		t5.`name` funded_name,
+		t4.`year`
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN
+		tb_erm_school_funded t4 ON t4.id = t1.funded_id
+		LEFT JOIN
+		tb_erm_funded
+		t5 ON t4.funded_id = t5.id
+		WHERE
+		t5. NAME IS NOT NULL
+		and
+		t1.global_status BETWEEN 10 and 15
+		<if test="year != null and year != ''">
+			and t4.year = #{year}
+		</if>
+		<if test="schoolId != null and schoolId != ''">
+			and t4.school_id = #{schoolId}
+		</if>
+		<if test="fundedType != null and fundedType != ''">
+			and t5.type = #{fundedType}
+		</if>
+		<if test="fundId != null and fundId != ''">
+			and t4.funded_id = #{fundId}
+		</if>
+		<if test="groupByField == type">
+			GROUP BY
+			t4. YEAR,
+			t5.type
+		</if>
+		<if test="groupByField == funded">
+			GROUP BY
+			t1.funded_id
+		</if>
+
+
+		<if test="type != null"> and type = #{type}</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by t1.id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryfundedTypeReportTotal" resultType="int">
+		select
+		count(1) from (SELECT
+		SUM(t1.money) sum_money,
+		count(t1.stu_id)
+		stu_count,
+		t5.type
+		funded_type,
+		t4.`year`
+		FROM
+		tb_erm_funded_info t1
+		LEFT
+		JOIN
+		tb_erm_school_funded t4 ON t4.id = t1.funded_id
+		LEFT JOIN
+		tb_erm_funded t5 ON t4.funded_id = t5.id
+		WHERE
+		t5. NAME IS NOT NULL
+		and
+		t1.global_status BETWEEN 10 and 15
+		<if test="year != null and year != ''">
+			and t4.year = #{year}
+		</if>
+		<if test="schoolId != null and schoolId != ''">
+			and t4.school_id = #{schoolId}
+		</if>
+		<if test="fundedType != null and fundedType != ''">
+			and t5.type = #{fundedType}
+		</if>
+		<if test="fundId != null and fundId != ''">
+			and t4.funded_id = #{fundId}
+		</if>
+		<if test="groupByField == type">
+			GROUP BY
+			t4. YEAR,
+			t5.type
+		</if>
+		<if test="groupByField == funded">
+			GROUP BY
+			t1.funded_id
+		</if>
+		) t
+	</select>
+
+	<select id="queryMapList" resultType="java.util.Map">
+		SELECT
+		t1.*,
+		t2.`name` stuName,
+		t2.age,
+		t2.birth,
+		t2.card_type cardType,
+		t2.clazz,
+		t2.consume_info consumeInfo,
+		t2.idcard,
+		CASE t2.gender when 1
+		THEN '男' WHEN 2 THEN '女' END gender,
+		t2.grade,
+		t2.start_year startYear,
+		t2.study_type studyType,
+		t2.stuno,
+		t3.address,
+		t3.father,
+		t3.mother,
+		t3.father_job fatherJob,
+		t3.mother_job montherJob,
+		t3.phone
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON t1.stu_id = t2.id
+		LEFT JOIN tb_erm_family t3 ON t3.id = (select family_id from
+		tb_erm_student where id = t1.stu_id)
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	<select id="queryMapListTotal" resultType="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		tb_erm_funded_info t1
+		LEFT JOIN tb_erm_student t2 ON t1.stu_id = t2.id
+		LEFT JOIN tb_erm_family t3 ON t3.id = (select family_id from
+		tb_erm_student where id = t1.stu_id)
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		tb_erm_funded_info where 1=1
+		<include refid="conditionSql"></include>
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmFundedInfoEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_funded_info
+		(
+		`stu_id`,
+		`funded_id`,
+		`global_status`,
+		`money`,
+		`funded_time`,
+		`score`,
+		`creator`,
+		`create_time`,
+		`updator`,
+		`update_time`,
+		`suggestion`,
+		`applypicurl`
+		)
+		values
+		(
+		#{stuId},
+		#{fundedId},
+		#{globalStatus},
+		#{money},
+		#{fundedTime},
+		#{score},
+		#{creator},
+		#{createTime},
+		#{updator},
+		#{updateTime},
+		#{suggestion},
+		#{applypicurl}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmFundedInfoEntity">
+		update tb_erm_funded_info
+		<set>
+			<if test="stuId != null">`stu_id` = #{stuId}, </if>
+			<if test="fundedId != null">`funded_id` = #{fundedId}, </if>
+			<if test="globalStatus != null">`global_status` = #{globalStatus}, </if>
+			<if test="money != null">`money` = #{money}, </if>
+			<if test="fundedTime != null">`funded_time` = #{fundedTime}, </if>
+			<if test="score != null">`score` = #{score}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime},</if>
+			<if test="applypicurl != null">`applypicurl` = #{applypicurl},</if>
+			<if test="suggestion != null">`suggestion` = #{suggestion}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from tb_erm_funded_info where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from tb_erm_funded_info where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="queryFundCountByFund" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT
+		COUNT(1)
+		FROM
+		tb_erm_student stu
+		LEFT JOIN tb_erm_funded_info t1 ON
+		t1.stu_id = stu.id
+		LEFT JOIN
+		tb_erm_school_funded schfund ON
+		t1.funded_id = schfund.id
+		WHERE
+		1 = 1
+		<if test="status != null and status != 0">
+			AND t1.global_status BETWEEN 10 AND 15
+		</if>
+
+		<if test="schoolId != null and schoolId != 0">
+			AND stu.school_id = #{schoolId,jdbcType=INTEGER}
+		</if>
+		<if test="fundId != null and fundId != 0">
+			AND schfund.funded_id = #{fundId,jdbcType=INTEGER}
+		</if>
+		<if test="year != null and year != ''">
+			AND schfund.year = #{year}
+		</if>
+
+	</select>
+
+	<select id="queryRemainCoutByStuFund" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT (SELECT schFund.count FROM tb_erm_school_funded
+		schFund WHERE id =
+		(SELECT stuFund.funded_id FROM tb_erm_funded_info
+		stuFund WHERE
+		stuFund.id=#{stuFundId,jdbcType=INTEGER})) -
+		(SELECT
+		COUNT(1) FROM tb_erm_audit_log auditLog JOIN tb_erm_funded_info
+		stuFund
+		ON auditLog.funded_id=stuFund.id JOIN tb_erm_school_funded
+		schFund ON stuFund.funded_id = schFund.id WHERE
+		schFund.school_id=#{schId,jdbcType=INTEGER} AND
+		auditLog.status=#{status,jdbcType=INTEGER} AND
+		schFund.id=#{schFundId,jdbcType=INTEGER}) AS remainCount
+	</select>
+
+
+	<select id="queryAuditSuccCountByStuFund" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+
+		SELECT COUNT(1) FROM tb_erm_audit_log auditLog JOIN
+		tb_erm_funded_info
+		stuFund ON auditLog.funded_id=stuFund.id WHERE 1=1
+		AND auditLog.status = #{status,jdbcType=INTEGER}
+		AND stuFund.id=
+		#{stuFundId,jdbcType=INTEGER}
+	</select>
+
+
+	<select id="queryStuFundByMap" resultMap="ermFundedInfoMap">
+		select * from
+		tb_erm_funded_info where 1=1 
+		<if test="stuId != null">
+			and stu_id = #{stuId,jdbcType=INTEGER}
+		</if>
+		<if test="schFundId != null">
+			AND funded_id= #{schFundId,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getReportYears" resultType="java.lang.Integer">
+		select DISTINCT year from
+		tb_erm_school_funded where school_id in(select id from tb_erm_school
+		where eb_id = #{ebId})
+	</select>
+
+	<select id="queryToAuditUserCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT COUNT(1) FROM
+		tb_erm_funded_info info
+		LEFT JOIN
+		tb_erm_school_funded schFund
+		ON info.funded_id = schFund.id
+		WHERE 1=1
+		<if test="status != null and status != 0">
+			AND info.global_status = #{status,jdbcType=INTEGER}
+		</if>
+		<if test="schId != null and schId != 0">
+			AND schFund.school_id =#{schId,jdbcType=INTEGER}
+		</if>
+		<if test="schFundId != null and schFundId != 0">
+			AND schFund.id = #{schFundId,jdbcType=INTEGER}
+		</if>
+
+		<if test="fundId != null and fundId != 0">
+			AND schFund.funded_id = #{fundId,jdbcType=INTEGER}
+		</if>
+		<if test="year != null and year != 0">
+			AND schFund.year = #{year,jdbcType=INTEGER}
+		</if>
+
+
+	</select>
+
+	<select id="queryRemainCoutBySchFund" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT (SELECT schFund.count FROM tb_erm_school_funded
+		schFund WHERE id =#{schFundId,jdbcType=INTEGER} ) -
+		(SELECT
+		COUNT(1)
+		FROM tb_erm_audit_log auditLog JOIN tb_erm_funded_info
+		stuFund
+		ON
+		auditLog.funded_id=stuFund.id JOIN tb_erm_school_funded
+		schFund ON
+		stuFund.funded_id = schFund.id 
+		left join tb_erm_student stus on
+		stuFund.stu_id = stus.id
+		WHERE
+		schFund.id=#{schFundId,jdbcType=INTEGER} AND
+		auditLog.status=#{status,jdbcType=INTEGER}
+		) AS remainCount
+	</select>
+
+	<select id="queryRemainUndeltCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT (SELECT schFund.count FROM tb_erm_school_funded
+		schFund WHERE
+		schFund.id =#{schFundId,jdbcType=INTEGER} AND
+		schFund.status=#{status,jdbcType=INTEGER}) -
+
+		(SELECT COUNT(1) FROM
+		tb_erm_funded_info info WHERE
+		info.funded_id =
+		#{schFundId,jdbcType=INTEGER} AND
+		info.global_status=#{status,jdbcType=INTEGER}) AS remainCount
+	</select>
+
+	<select id="queryStuFundInfoByStudentMap" resultMap="ermFundedInfoMap"
+		parameterType="java.util.Map">
+		SELECT
+		info.*
+		FROM tb_erm_funded_info info
+		LEFT JOIN
+		tb_erm_school_funded schFund
+		ON info.funded_id = schFund.id
+		LEFT JOIN
+		tb_erm_student stu
+		ON info.stu_id = stu.id
+		WHERE schFund.id =
+		#{schFundId}
+		AND stu.idcard = #{idcard}
+		AND stu.school_id = #{schId}
+	</select>
+</mapper>

@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmStudentDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.coomia.erm.entity.ErmStudentEntity" id="ermStudentMap">
+        <result property="id" column="id"/>
+        <result property="familyId" column="family_id"/>
+        <result property="schoolId" column="school_id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="birth" column="birth"/>
+        <result property="stuno" column="stuno"/>
+        <result property="cardType" column="card_type"/>
+        <result property="idcard" column="idcard"/>
+        <result property="major" column="major"/>
+        <result property="schSystem" column="sch_system"/>
+        <result property="pinyin" column="pinyin"/>
+        <result property="engname" column="engname"/>
+        <result property="startYear" column="start_year"/>
+        <result property="age" column="age"/>
+        <result property="zone" column="zone"/>
+        <result property="grade" column="grade"/>
+        <result property="studyType" column="study_type"/>
+        <result property="stuType" column="stu_type"/>
+        <result property="clazz" column="clazz"/>
+        <result property="telphone" column="telphone"/>
+        <result property="address" column="address"/>
+        <result property="divisionCode" column="division_code"/>
+        <result property="residenceType" column="residence_type"/>
+        <result property="nature" column="nature"/>
+        <result property="birthPlace" column="birth_place"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="marriageStatus" column="marriage_status"/>
+        <result property="healthStatus" column="health_status"/>
+        <result property="politicalStatus" column="political_status"/>
+        <result property="nation" column="nation"/>
+        <result property="isForeign" column="is_foreign"/>
+        <result property="attendingType" column="attending_type"/>
+        <result property="learnType" column="learn_type"/>
+        <result property="lowInsurance" column="low_insurance"/>
+        <result property="handicapped" column="handicapped"/>
+        <result property="consumeInfo" column="consume_info"/>
+        <result property="defaultBankcard" column="default_bankcard"/>
+        <result property="addressType" column="addressType"/>
+        <result property="accountType" column="account_type"/>
+        <result property="schoolName" column="school_name"/>
+        <result property="isPoor" column="is_poor"/>
+        <result property="studentFrom" column="student_from"></result>
+        <result property="actualBankcard" column="actual_bankcard"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updator" column="updator"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="policeStation" column="police_station"/>
+        <result property="trainRegion" column="train_region"/>
+        <result property="studentObj" column="student_obj"/>
+        <result property="studyPlace" column="study_place"/>
+        <result property="isMove" column="is_move"/>
+        <result property="transProvincial" column="trans_provincial"/>
+        <result property="cooperationType" column="cooperation_type"/>
+        <result property="subTeach" column="sub_teach"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="money" column="money"/>
+        <result property="photoUrl" column="photo_url"/>
+        <result property="applicationPhotoUrl" column="application_photo_url"/>
+        <result property="semester" column="semester"/>
+        <result property="recruitType" column="recruitType"/>
+        <result property="birthDivisionCode" column="birthDivisionCode"/>
+        <result property="registeredDivisionCode" column="registeredDivisionCode"/>
+        <result property="addressTown" column="address_town"/>
+        <result property="registeredDivisionCode" column="registeredDivisionCode"/>
+        <result property="registeredDivisionCode" column="registeredDivisionCode"/>
+        <result property="addressTown" column="addressTown"/>
+        <result property="addressTownship" column="addressTownship"/>
+        <result property="addressGroup" column="addressGroup"/>
+        <result property="addressProvince" column="addressProvince"/>
+        <result property="addressCity" column="addressCity"/>
+        <result property="addressArea" column="addressArea"/>
+        <result property="diffLevel" column="diff_level"/>
+        <result property="headTeacheCheck" column="head_teache_check"/>
+        <result property="headTeacheName" column="head_teache_name"/>
+        <result property="flag" column="flag"/>
+        <result property="score" column="score"/>
+        <result property="note" column="note"/>
+        <result property="isGraduation" column="is_graduation"/>
+        <result property="lodging" column="lodging"/>
+        <result property="helper" column="helper"/>
+
+        <result property="isArchives" column="is_archives"/>
+        <result property="archiveName" column="archive_name"/>
+        <result property="archiveIdcard" column="archive_idcard"/>
+
+        <result property="archiveRelation" column="archiveRelation"/>
+        <result property="archiveAcount" column="archiveAcount"/>
+        <result property="supportName" column="supportName"/>
+        <result property="supportBankCard" column="supportBankCard"/>
+        <result property="helperWorkPlace" column="helperWorkPlace"/>
+        <result property="helperPosition" column="helperPosition"/>
+        <result property="helperTel" column="helperTel"/>
+        <result property="familyNum" column="familyNum"/>
+    </resultMap>
+
+    <select id="queryObject" resultMap="ermStudentMap">
+		select * from tb_erm_student
+		where id = #{value}
+	</select>
+
+    <sql id="conditionSql">
+        <if test="name != null and name != ''">
+            and name like '%${name}%'
+        </if>
+        <if test="idcard != null and idcard != ''">
+            and idcard = #{idcard}
+        </if>
+        <if test="stuno != null and stuno != ''">
+            and stuno = #{stuno}
+        </if>
+        <if test="minAge != null and minAge != ''">
+            and age &gt; #{minAge}
+        </if>
+        <if test="maxAge != null and maxAge != ''">
+            and age &lt; #{maxAge}
+        </if>
+        <if test="gender != null and gender != ''">
+            and gender = #{gender}
+        </if>
+        <if test="clazz != null and clazz != ''">
+            and clazz = #{clazz}
+        </if>
+        <if test="grade != null and grade != ''">
+            and grade = #{grade}
+        </if>
+        <if test="isgrade != null and isgrade != ''">
+            and is_graduation !=1
+        </if>
+        <if test="schId != null and schId != 0">
+            and school_id = #{schId}
+        </if>
+        <if test="isPoor != null and isPoor != ''">
+            and is_poor = #{isPoor}
+        </if>
+        <if test="flag != null and flag != 0">
+            and flag = #{flag}
+        </if>
+        <if test="headTeacheCheck != null">
+            and head_teache_check = #{headTeacheCheck}
+        </if>
+        <if test="diffLevel != null and diffLevel != ''">
+            and diff_level = #{diffLevel}
+        </if>
+        <if test="isGraduation != null">
+            and is_graduation = #{isGraduation}
+        </if>
+        <if test="audited != null and schId != null">
+            and id not in(select stu_id from tb_erm_funded_info where
+            stu_id in (select id from tb_erm_student where school_id = #{schId}))
+        </if>
+        <if test="hasAvatar != '' and hasAvatar == 1">
+            and (photo_url IS NOT NULL and photo_url != '')
+        </if>
+        <if test="school != null and school != '' ">
+            and school like '%${school}%'
+        </if>
+        <if test="hasAvatar != '' and hasAvatar == 0 ">
+            and (photo_url IS NULL or photo_url = '')
+        </if>
+        <if test=" address != null and address != ''  ">
+            and address like concat(concat('%',#{address}),'%')
+        </if>
+        <if test="hasApplyInfo != '' and hasApplyInfo == 0 ">
+            and family_id is null
+        </if>
+        <if test="hasApplyInfo != '' and hasApplyInfo == 1 ">
+            and family_id is not null
+        </if>
+        <if test="hasApplyImg != '' and hasApplyImg == 1 ">
+            and family_id is not null
+        </if>
+        <if test="hasApplyImg != '' and hasApplyImg == 0 ">
+            and family_id is null
+        </if>
+        <if test="schFundId != null and schFundId != ''">
+            and id not in(SELECT stu_id FROM tb_erm_funded_info WHERE
+            funded_id =#{schFundId})
+        </if>
+    </sql>
+
+    <select id="queryList" resultMap="ermStudentMap">
+        select * from tb_erm_student where 1=1
+        <include refid="conditionSql"></include>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by score desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        select count(*) from tb_erm_student where 1 = 1
+        <include refid="conditionSql"></include>
+    </select>
+
+    <insert id="save" parameterType="com.coomia.erm.entity.ErmStudentEntity"
+            useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_student
+		(
+		`family_id`,
+		`school_id`,
+		`name`,
+		`gender`,
+		`birth`,
+		`stuno`,
+		`card_type`,
+		`idcard`,
+		`major`,
+		`sch_system`,
+		`pinyin`,
+		`engname`,
+		`start_year`,
+		`age`,
+		`zone`,
+		`grade`,
+		`study_type`,
+		`stu_type`,
+		`clazz`,
+		`telphone`,
+		`address`,
+		`division_code`,
+		`residence_type`,
+		`nature`,
+		`birth_place`,
+		`city_code`,
+		`marriage_status`,
+		`health_status`,
+		`political_status`,
+		`nation`,
+		`is_foreign`,
+		`attending_type`,
+		`learn_type`,
+		`low_insurance`,
+		`handicapped`,
+		`consume_info`,
+		`default_bankcard`,
+		`addressType`,
+		`account_type`,
+		`school_name`,
+		`is_poor`,
+		`student_from`,
+		`actual_bankcard`,
+		`creator`,
+		`create_time`,
+		`updator`,
+		`update_time`,
+		`police_station`,
+		`train_region`,
+		`student_obj`,
+		`study_place`,
+		`is_move`,
+		`trans_provincial`,
+		`cooperation_type`,
+		`sub_teach`,
+		`parent_name`,
+		`money`,
+		`photo_url`,
+		`application_photo_url`,
+		`semester`,
+		`recruitType`,
+		`birthDivisionCode`,
+		`registeredDivisionCode`,
+		`addressProvince`,
+		`addressCity`,
+		`addressArea`,
+		`addressTown`,
+		`addressTownship`,
+		`addressGroup`,
+		`score`,
+		`diff_level`,
+		`head_teache_check`,
+		`head_teache_name`,
+		`note`,
+		`flag`,
+		`is_graduation`,
+		`lodging`,
+		`helper`,
+		`is_archives`,
+			`archive_name`,
+			`archive_idcard`,
+			`archiveRelation`,
+			`archiveAcount`,
+			`supportName`,
+			`supportBankCard`,
+			`helperWorkPlace`,
+			`helperPosition`,
+			`helperTel`,
+			`familyNum`,
+			`school`
+
+		)
+		values
+		(
+		#{familyId},
+		#{schoolId},
+		#{name},
+		#{gender},
+		#{birth},
+		#{stuno},
+		#{cardType},
+		#{idcard},
+		#{major},
+		#{schSystem},
+		#{pinyin},
+		#{engname},
+		#{startYear},
+		#{age},
+		#{zone},
+		#{grade},
+		#{studyType},
+		#{stuType},
+		#{clazz},
+		#{telphone},
+		#{address},
+		#{divisionCode},
+		#{residenceType},
+		#{nature},
+		#{birthPlace},
+		#{cityCode},
+		#{marriageStatus},
+		#{healthStatus},
+		#{politicalStatus},
+		#{nation},
+		#{isForeign},
+		#{attendingType},
+		#{learnType},
+		#{lowInsurance},
+		#{handicapped},
+		#{consumeInfo},
+		#{defaultBankcard},
+		#{addressType},
+		#{accountType},
+		#{schoolName},
+		#{isPoor},
+		#{studentFrom},
+		#{actualBankcard},
+		#{creator},
+		#{createTime},
+		#{updator},
+		#{updateTime},
+		#{policeStation},
+		#{trainRegion},
+		#{studentObj},
+		#{studyPlace},
+		#{isMove},
+		#{transProvincial},
+		#{cooperationType},
+		#{subTeach},
+		#{parentName},
+		#{money},
+		#{photoUrl},
+		#{applicationPhotoUrl},
+		#{semester},
+		#{recruitType},
+		#{birthDivisionCode},
+		#{registeredDivisionCode},
+		#{addressProvince},
+		#{addressCity},
+		#{addressArea},
+		#{addressTown},
+		#{addressTownship},
+		#{addressGroup},
+		#{score},
+		#{diffLevel},
+		#{headTeacheCheck},
+		#{headTeacheName},
+		#{note},
+		#{flag},
+		#{isGraduation},
+		#{lodging},
+		#{helper},
+		#{isArchives},
+			#{archiveName},
+			#{archiveIdcard},
+			#{archiveRelation},
+			#{archiveAcount},
+			#{supportName},
+			#{supportBankCard},
+			#{helperWorkPlace},
+			#{helperPosition},
+			#{helperTel},
+			#{familyNum},
+			#{school}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.coomia.erm.entity.ErmStudentEntity">
+        update tb_erm_student
+        <set>
+            <if test="familyId != null">`family_id` = #{familyId},</if>
+            <if test="schoolId != null">`school_id` = #{schoolId},</if>
+            <if test="name != null and name != ''">`name` = #{name},</if>
+            <if test="gender != null">`gender` = #{gender},</if>
+            <if test="birth != null">`birth` = #{birth},</if>
+            <if test="stuno != null">`stuno` = #{stuno},</if>
+            <if test="cardType != null">`card_type` = #{cardType},</if>
+            <if test="idcard != null">`idcard` = #{idcard},</if>
+            <if test="major != null">`major` = #{major},</if>
+            <if test="schSystem != null">`sch_system` = #{schSystem},</if>
+            <if test="pinyin != null">`pinyin` = #{pinyin},</if>
+            <if test="engname != null">`engname` = #{engname},</if>
+            <if test="startYear != null">`start_year` = #{startYear},</if>
+            <if test="age != null">`age` = #{age},</if>
+            <if test="zone != null">`zone` = #{zone},</if>
+            <if test="grade != null and grade !=''">`grade` = #{grade},</if>
+            <if test="studyType != null">`study_type` = #{studyType},</if>
+            <if test="stuType != null">`stu_type` = #{stuType},</if>
+            <if test="clazz != null and clazz !=''">`clazz` = #{clazz},</if>
+            <if test="telphone != null and telphone !=''">`telphone` = #{telphone},</if>
+            <if test="address != null and address!=''">`address` = #{address},</if>
+            <if test="divisionCode != null">`division_code` = #{divisionCode},</if>
+            <if test="residenceType != null">`residence_type` = #{residenceType},</if>
+            <if test="nature != null">`nature` = #{nature},</if>
+            <if test="birthPlace != null">`birth_place` = #{birthPlace},</if>
+            <if test="cityCode != null">`city_code` = #{cityCode},</if>
+            <if test="marriageStatus != null">`marriage_status` = #{marriageStatus},</if>
+            <if test="healthStatus != null">`health_status` = #{healthStatus},</if>
+            <if test="politicalStatus != null">`political_status` = #{politicalStatus},</if>
+            <if test="nation != null">`nation` = #{nation},</if>
+            <if test="isForeign != null">`is_foreign` = #{isForeign},</if>
+            <if test="attendingType != null">`attending_type` = #{attendingType},</if>
+            <if test="learnType != null">`learn_type` = #{learnType},</if>
+            <if test="lowInsurance != null">`low_insurance` = #{lowInsurance},</if>
+            <if test="handicapped != null">`handicapped` = #{handicapped},</if>
+            <if test="consumeInfo != null">`consume_info` = #{consumeInfo},</if>
+            <if test="defaultBankcard != null">`default_bankcard` = #{defaultBankcard},</if>
+            <if test="addressType != null">`addressType` = #{addressType},</if>
+            <if test="accountType != null">`account_type` = #{accountType},</if>
+            <if test="schoolName != null">`school_name` = #{schoolName},</if>
+            <if test="isPoor != null">`is_poor` = #{isPoor},</if>
+            <if test="studentFrom != null">`student_from` = #{studentFrom},</if>
+            <if test="actualBankcard != null">`actual_bankcard` = #{actualBankcard},</if>
+            <if test="creator != null">`creator` = #{creator},</if>
+            <if test="createTime != null">`create_time` = #{createTime},</if>
+            <if test="updator != null">`updator` = #{updator},</if>
+            <if test="updateTime != null">`update_time` = #{updateTime},</if>
+            <if test="policeStation != null">`police_station` = #{policeStation},</if>
+            <if test="trainRegion != null">`train_region` = #{trainRegion},</if>
+            <if test="studentObj != null">`student_obj` = #{studentObj},</if>
+            <if test="studyPlace != null">`study_place` = #{studyPlace},</if>
+            <if test="isMove != null">`is_move` = #{isMove},</if>
+            <if test="transProvincial != null">`trans_provincial` = #{transProvincial},</if>
+            <if test="cooperationType != null">`cooperation_type` = #{cooperationType},</if>
+            <if test="subTeach != null">`sub_teach` = #{subTeach},</if>
+            <if test="parentName != null">`parent_name` = #{parentName},</if>
+            <if test="money != null">`money` = #{money},</if>
+            <if test="photoUrl != null and photoUrl != ''">`photo_url` = #{photoUrl},</if>
+            <if test="applicationPhotoUrl != null  and applicationPhotoUrl != ''">`application_photo_url` =
+                #{applicationPhotoUrl},
+            </if>
+            <if test="semester != null  and semester != ''">`semester` = #{semester},</if>
+            <if test="recruitType != null  and recruitType != ''">`recruitType` = #{recruitType},</if>
+            <if test="birthDivisionCode != null">`birthDivisionCode` = #{birthDivisionCode},</if>
+            <if test="registeredDivisionCode != null">`registeredDivisionCode` = #{registeredDivisionCode},
+            </if>
+            <if test="addressProvince != null  and addressProvince != '' ">`addressProvince` = #{addressProvince},</if>
+            <if test="addressCity != null and addressCity != ''">`addressCity` = #{addressCity},</if>
+            <if test="addressArea != null  and addressArea != ''">`addressArea` = #{addressArea},</if>
+            <if test="addressTown != null  and addressTown != '' ">`addressTown` = #{addressTown},</if>
+            <if test="addressTownship != null and addressTownship != ''">`addressTownship` = #{addressTownship},</if>
+            <if test="addressGroup != null  and addressGroup != ''">`addressGroup` = #{addressGroup},</if>
+            <if test="score != null and score !=0 ">`score` = #{score},</if>
+            <if test="diffLevel != null">`diff_level` = #{diffLevel},</if>
+            <if test="headTeacheCheck != null and headTeacheCheck !=0">`head_teache_check` = #{headTeacheCheck},</if>
+            <if test="headTeacheName != null and headTeacheName !=''">`head_teache_name` = #{headTeacheName},</if>
+            <if test="note != null">`note` = #{note},</if>
+            <if test="flag != null">`flag` = #{flag},</if>
+            <if test="isGraduation != null">`is_graduation` = #{isGraduation},</if>
+            <if test="flag != null">`lodging` = #{lodging},</if>
+            <if test="isGraduation != null">`helper` = #{helper},</if>
+            <if test="archiveName != null">`archive_name` = #{archiveName},</if>
+            <if test="archiveIdcard != null">`archive_idcard` = #{archiveIdcard},</if>
+            <if test="archiveRelation != null">`archiveRelation` = #{archiveRelation},</if>
+            <if test="archiveAcount != null">`archiveAcount` = #{archiveAcount},</if>
+            <if test="supportName != null">`supportName` = #{supportName},</if>
+            <if test="supportBankCard != null">`supportBankCard` = #{supportBankCard},</if>
+            <if test="helperWorkPlace != null">`helperWorkPlace` = #{helperWorkPlace},</if>
+            <if test="helperPosition != null">`helperPosition` = #{helperPosition},</if>
+            <if test="familyNum != null">`familyNum` = #{familyNum},</if>
+            <if test="helperTel != null">`helperTel` = #{helperTel},</if>
+            <if test="school != null">`school` = #{school}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete">
+		delete from tb_erm_student where id = #{value}
+	</delete>
+
+    <delete id="deleteBatch">
+        delete from tb_erm_student where id in
+        <foreach item="id" collection="array" open="(" separator=","
+                 close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="queryStudentByStuFundId" resultMap="ermStudentMap">
+		SELECT stu.* FROM
+		tb_erm_student stu JOIN tb_erm_funded_info stuFund ON stu.id =
+		stuFund.stu_id WHERE stuFund.id = #{value}
+	</select>
+
+
+    <select id="queryObjectByIdCard" resultMap="ermStudentMap">
+		select * from
+		tb_erm_student where idcard = #{idcard}
+	</select>
+
+    <select id="queryObjectByMap" resultMap="ermStudentMap"
+            parameterType="java.util.Map">
+        select * from
+        tb_erm_student where 1=1
+        <if test="schoolId  !=null">
+            and school_id = #{schoolId}
+        </if>
+        <if test="idcard  !=null">
+            AND idcard = #{idcard}
+        </if>
+        <if test="isGraduation  !=null">
+            AND is_graduation = #{isGraduation}
+        </if>
+        <if test="name  !=null">
+            and name=#{name}
+        </if>
+        <if test="flag  !=null">
+            and flag=#{flag}
+        </if>
+    </select>
+
+    <update id="doTagStudentAsNeedReview" parameterType="Integer">
+		update
+		tb_erm_student
+		set flag = 1
+		where school_id=#{schId} and diff_level>0
+	</update>
+
+
+    <update id="doAdjustBatch" parameterType="com.coomia.erm.entity.ErmAdjustParam">
+        update tb_erm_student set diff_level = #{diffLevel}, note = #{note}
+        where school_id = #{schId} and id in
+        <foreach item="id" collection="stuIds" open="(" separator=","
+                 close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="queryStudentGroupByClazz" parameterType="java.util.Map"
+            resultMap="ermStudentMap">
+        select grade,clazz from tb_erm_student where clazz is not null and
+        school_id =
+        #{schId}
+        <if test="grade != null and grade != ''">and grade like '%${grade}%'</if>
+        <if test="clazz != null and clazz != ''">and clazz like '%${clazz}%'</if>
+        group by grade,clazz
+    </select>
+
+    <resultMap type="com.coomia.erm.entity.ErmStudentVo" id="ermStudentVoMap">
+        <result property="schoolId" column="school_id"/>
+        <result property="name" column="name"/>
+        <result property="idcard" column="idcard"/>
+        <result property="grade" column="grade"/>
+        <result property="clazz" column="clazz"/>
+    </resultMap>
+
+    <select id="queryStudentsByParam" parameterType="java.util.Map"
+            resultMap="ermStudentVoMap">
+        SELECT stu.grade, stu.clazz, stu.name, idcard FROM `tb_erm_student`
+        stu WHERE stu.school_id =#{schoolId}
+        <if test="grade != null and grade != ''">and grade = #{grade}</if>
+        <if test="clazz != null and clazz != ''">and clazz = #{clazz}</if>
+        <if test="name != null and name != ''">and name = #{name}</if>
+        group by grade,clazz,name,idcard
+    </select>
+
+    <select id="queryStudentsBySchoolId" parameterType="java.util.Map"
+            resultMap="ermStudentMap">
+        select tbs.* from ( SELECT grade,clazz,name,idcard, `family_id`,id FROM `tb_erm_student`
+        stu WHERE stu.school_id =#{schoolId}
+        <if test="grade != null and grade != ''">and grade = #{grade}</if>
+        <if test="clazz != null and clazz != ''">and clazz = #{clazz}</if>
+        <if test="name != null and name != ''">and name = #{name}</if>
+        <if test="stuId != null and stuId != ''">and id = #{stuId}</if>
+        group by grade,clazz,name,idcard, `family_id`,id)b left join `tb_erm_student` tbs on b.id= tbs.id
+    </select>
+
+    <select id="queryStudentsByFundIdAndSchoolId" resultType="java.util.Map">
+        SELECT stu.*,school_name as schoolName,tef.* from tb_erm_student stu LEFT JOIN tb_erm_funded_info efi ON
+        stu.id=efi.stu_id LEFT JOIN tb_erm_school sch ON stu.school_id=sch.id
+        LEFT JOIN tb_erm_family tef ON stu.family_id=tef.id LEFT JOIN tb_erm_school_funded schFund ON
+        schFund.id=efi.funded_id
+        WHERE schFund.funded_id=#{fundId} and efi.global_status=15
+        <if test="schoolId != null and schoolId != ''">
+            AND stu.school_id=#{schoolId}
+        </if>
+    </select>
+
+    <select id="queryStudentsByFundIdAndSchoolIdAndPage" resultType="java.util.Map">
+        SELECT stu.*,school_name as schoolName from tb_erm_student stu LEFT JOIN tb_erm_funded_info efi ON
+        stu.id=efi.stu_id LEFT JOIN tb_erm_school sch ON stu.school_id=sch.id
+        LEFT JOIN tb_erm_family tef ON stu.family_id=tef.id LEFT JOIN tb_erm_school_funded schFund ON
+        schFund.id=efi.funded_id
+        WHERE schFund.funded_id=#{fundId} and efi.global_status=15
+        <if test="schoolId != null and schoolId != ''">
+            AND stu.school_id=#{schoolId}
+        </if>
+
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by stu.id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+
+    <select id="queryStudentsByFundIdAndSchoolIdTotal" resultType="java.lang.Integer">
+        SELECT count(*) from tb_erm_student stu LEFT JOIN tb_erm_funded_info efi ON stu.id=efi.stu_id LEFT JOIN
+        tb_erm_school sch ON stu.school_id=sch.id
+        LEFT JOIN tb_erm_family tef ON stu.family_id=tef.id LEFT JOIN tb_erm_school_funded schFund ON
+        schFund.id=efi.funded_id
+        WHERE schFund.funded_id=#{fundId} and efi.global_status=15
+        <if test="schoolId != null and schoolId != ''">
+            AND stu.school_id=#{schoolId}
+        </if>
+    </select>
+    <resultMap id="sumStudentEnterResult" type="com.coomia.erm.dto.StudentEnterDTO">
+
+        <id column="schoolId" property="schoolId"/>
+        <result column="name" property="school"/>
+        <collection property="students" ofType="map">
+            <id column="studenId" property="studenId"/>
+        </collection>
+    </resultMap>
+    <select id="sumStudentEnter" resultMap="sumStudentEnterResult">
+
+		select  sc.name, sc.id as schoolId,stu.id as studenId
+		from tb_erm_school   as sc
+		left join tb_erm_student  as stu
+		 on  stu.school_id=sc.id
+
+	</select>
+</mapper>

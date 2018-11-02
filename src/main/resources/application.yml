@@ -1,0 +1,42 @@
+spring:  
+  profiles:  
+    active: dev
+
+spring.http.multipart:
+  enabled: true # Enable support of multi-part uploads.
+  max-file-size: 100Mb
+  max-request-size: 100Mb
+
+erm.security.jwt:
+  tokenExpirationTime: 60 # Number of minutes
+  refreshTokenExpTime: 60 # Minutes
+  tokenSigningKey: xm8EV6Hy5RMFK4EEACIDAwQus
+
+erm.edubur:
+  ebId: 1 
+
+#上传文件相关配置
+#静态资源配置
+upload.path: /upload/img
+#访问目录
+upload.dir: /public/img/
+
+endpoints:
+  shutdown:
+    enabled: true
+    sensitive: false
+ 
+#encoding设置
+spring.http.encoding:
+  force: true
+  charset: UTF-8
+  enabled: true
+server.tomcat.uri-encoding: UTF-8
+
+#exception处理
+spring.mvc.throw-exception-if-no-handler-found: true
+spring.mvc.favicon.enabled: false
+
+#Mybatis配置
+mybatis:
+    mapperLocations: classpath:mapper/**/*.xml

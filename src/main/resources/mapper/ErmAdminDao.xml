@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmAdminDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.coomia.erm.entity.ErmAdminEntity" id="ermAdminMap">
+        <result property="id" column="id"/>
+        <result property="telphone" column="telphone"/>
+        <result property="name" column="name"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="disabled" column="disabled"/>
+        <result property="roleId" column="role_id"/>
+        <result property="email" column="email"/>
+        <result property="schoolId" column="school_id"/>
+         <result property="ebId" column="eb_id"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updator" column="updator"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="school" column="school_id" select="getSchool"/>   
+    </resultMap>
+    
+    <select id="getSchool" parameterType="int" resultType="com.coomia.erm.entity.ErmSchoolEntity">
+        select * from tb_erm_school where id =#{id}
+    </select>
+
+	<select id="queryObject" resultMap="ermAdminMap">
+		select * from tb_erm_admin where id = #{value}
+	</select>
+
+	<select id="queryBySchoolId" resultMap="ermAdminMap">
+		select * from tb_erm_admin where school_id = #{schoolId}
+	</select>
+
+	<select id="queryList" resultMap="ermAdminMap">
+		select * from tb_erm_admin where role_id in(3,4) 
+		and eb_id = #{ebId}
+		<if test="schoolId != null"> and school_id = #{schoolId}</if>
+		<if test="schools != null"> and school_id in (${schools})</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_erm_admin where role_id in(3,4) 
+		and eb_id = #{ebId}
+		<if test="schoolId != null"> and school_id = #{schoolId}</if>
+		<if test="schools != null"> and school_id in (${schools})</if>
+	</select>
+	 
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmAdminEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_admin
+		(
+			`telphone`, 
+			`name`, 
+			`username`, 
+			`password`, 
+			`disabled`, 
+			`role_id`, 
+			`email`, 
+			`school_id`, 
+			`eb_id`, 
+			`creator`, 
+			`create_time`, 
+			`updator`, 
+			`update_time`
+		)
+		values
+		(
+			#{telphone}, 
+			#{name}, 
+			#{username}, 
+			#{password}, 
+			#{disabled}, 
+			#{roleId}, 
+			#{email}, 
+			#{schoolId}, 
+			#{ebId},
+			#{creator}, 
+			#{createTime}, 
+			#{updator}, 
+			#{updateTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.coomia.erm.entity.ErmAdminEntity">
+		update tb_erm_admin 
+		<set>
+			<if test="telphone != null">`telphone` = #{telphone}, </if>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="username != null">`username` = #{username}, </if>
+			<if test="password != null">`password` = #{password}, </if>
+			<if test="disabled != null">`disabled` = #{disabled}, </if>
+			<if test="roleId != null">`role_id` = #{roleId}, </if>
+			<if test="email != null">`email` = #{email}, </if>
+			<if test="schoolId != null">`school_id` = #{schoolId}, </if>
+			<if test="ebId != null">`eb_id` = #{ebId}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_erm_admin where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_erm_admin where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="queryObjectByName"  resultMap = "ermAdminMap" parameterType="map">
+		select * from tb_erm_admin where username = #{username} and eb_id=  #{ebId}
+	</select>
+
+</mapper>

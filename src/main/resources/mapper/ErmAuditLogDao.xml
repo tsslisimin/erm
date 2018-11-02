@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmAuditLogDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.coomia.erm.entity.ErmAuditLogEntity" id="ermAuditLogMap">
+        <result property="id" column="id"/>
+        <result property="status" column="status"/>
+        <result property="level" column="level"/>
+        <result property="adminId" column="admin_id"/>
+        <result property="auditDate" column="audit_date"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="fundedId" column="funded_id"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updator" column="updator"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+	<select id="queryObject" resultMap="ermAuditLogMap">
+		select * from tb_erm_audit_log where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="ermAuditLogMap">
+		select * from tb_erm_audit_log where 1 = 1 
+		<if test="fundedId != null">
+			and funded_id = #{fundedId}
+		</if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_erm_audit_log 
+	</select>
+	 
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmAuditLogEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_audit_log
+		(
+			`status`, 
+			`level`, 
+			`admin_id`, 
+			`audit_date`, 
+			`audit_remark`, 
+			`funded_id`, 
+			`creator`, 
+			`create_time`, 
+			`updator`, 
+			`update_time`
+		)
+		values
+		(
+			#{status}, 
+			#{level}, 
+			#{adminId}, 
+			#{auditDate}, 
+			#{auditRemark}, 
+			#{fundedId}, 
+			#{creator}, 
+			#{createTime}, 
+			#{updator}, 
+			#{updateTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.coomia.erm.entity.ErmAuditLogEntity">
+		update tb_erm_audit_log 
+		<set>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="level != null">`level` = #{level}, </if>
+			<if test="adminId != null">`admin_id` = #{adminId}, </if>
+			<if test="auditDate != null">`audit_date` = #{auditDate}, </if>
+			<if test="auditRemark != null">`audit_remark` = #{auditRemark}, </if>
+			<if test="fundedId != null">`funded_id` = #{fundedId}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_erm_audit_log where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_erm_audit_log where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="queryLog" resultType="int" parameterType="java.util.Map">
+		select count(1) from tb_erm_audit_log where funded_id = #{stuFundId,jdbcType=INTEGER}
+		and status = #{status,jdbcType=INTEGER}
+	</select>
+
+</mapper>

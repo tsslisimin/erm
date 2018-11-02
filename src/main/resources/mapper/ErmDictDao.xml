@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmDictDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.coomia.erm.entity.ErmDictEntity" id="ermDictMap">
+        <result property="id" column="id"/>
+        <result property="type" column="type"/>
+        <result property="dictCode" column="dict_code"/>
+        <result property="dictName" column="dict_name"/>
+    </resultMap>
+
+    <select id="queryObject" resultMap="ermDictMap">
+		select * from tb_erm_dict where id = #{value}
+	</select>
+
+    <select id="getDictNameByCode" resultType="string">
+
+	select dict_name from tb_erm_dict where dict_code = #{code}
+	</select>
+    <select id="getDictNameByName" resultMap="ermDictMap">
+        select * from tb_erm_dict where dict_name = #{dictName}
+        <if test="type != null and type != ''">
+            and type = #{type}
+        </if>
+
+    </select>
+
+    <select id="getDictByType" resultMap="ermDictMap">
+        select * from tb_erm_dict where 1=1
+        <if test="type != null and type != ''">
+            and type = #{type}
+        </if>
+
+    </select>
+
+    <select id="queryList" resultMap="ermDictMap">
+        select * from tb_erm_dict where 1 = 1
+        <if test="type != null and type != ''">
+            and type = #{type}
+        </if>
+        <if test="minType != null and minType != ''">
+            and type &gt;= #{minType}
+        </if>
+        <if test="maxType != null and maxType != ''">
+            and type &lt;= #{maxType}
+        </if>
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by id asc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from tb_erm_dict 
+	</select>
+
+    <insert id="save" parameterType="com.coomia.erm.entity.ErmDictEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_dict
+		(
+			`type`, 
+			`dict_code`, 
+			`dict_name`
+		)
+		values
+		(
+			#{type}, 
+			#{dictCode}, 
+			#{dictName}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.coomia.erm.entity.ErmDictEntity">
+        update tb_erm_dict
+        <set>
+            <if test="type != null">`type` = #{type},</if>
+            <if test="dictCode != null">`dict_code` = #{dictCode},</if>
+            <if test="dictName != null">`dict_name` = #{dictName}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete">
+		delete from tb_erm_dict where id = #{value}
+	</delete>
+
+    <delete id="deleteBatch">
+        delete from tb_erm_dict where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

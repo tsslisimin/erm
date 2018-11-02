@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmFieldDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmFieldEntity" id="ermFieldMap">
+		<result property="id" column="id" />
+		<result property="fieldCode" column="field_code" />
+		<result property="fieldName" column="field_name" />
+		<result property="type" column="type" />
+		<result property="weight" column="weight" />
+		<result property="flag" column="flag" />
+	</resultMap>
+
+	<!-- 字段和值关联信息 -->
+	<resultMap type="com.coomia.erm.entity.ErmFieldEntity" id="ermFieldValMap">
+		<result property="id" column="id" />
+		<result property="fieldCode" column="field_code" />
+		<result property="fieldName" column="field_name" />
+		<result property="type" column="type" />
+		<result property="weight" column="weight" />
+		<result property="flag" column="flag" />
+		<collection property="fieldVal"
+			ofType="com.coomia.erm.entity.ErmFieldValEntity">
+			<id property="id" column="val_id" />
+			<result property="fieldId" column="field_id" />
+			<result property="valKey" column="val_key" />
+			<result property="valVal" column="val_val" />
+			<result property="valWeight" column="val_weight" />
+		</collection>
+	</resultMap>
+
+	<select id="queryObject" resultMap="ermFieldValMap">
+		SELECT
+		t.*,
+		t2.id val_id,
+		t2.field_id,
+		t2.val_key,
+		t2.val_val,
+		t2.val_weight
+		FROM
+		tb_erm_field t
+		LEFT
+		JOIN tb_erm_field_val t2 ON t.id = t2.field_id
+		where t.id =
+		#{value}
+	</select>
+
+	<select id="queryList" resultMap="ermFieldValMap">
+		SELECT
+		t.*,
+		t2.id val_id,
+		t2.field_id,
+		t2.val_key,
+		t2.val_val,
+		t2.val_weight
+		FROM
+		tb_erm_field t
+		LEFT JOIN tb_erm_field_val t2 ON t.id =
+		t2.field_id
+		where 1 = 1
+		and t.flag = #{flag}
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryStuFieldList" resultMap="ermFieldMap">
+		SELECT f.* FROM
+		tb_erm_sch_field sf JOIN tb_erm_field f ON sf.field_id=f.id WHERE
+		sf.flag =1 and 
+		sf.sch_id=
+		#{schId}
+	</select>
+
+	<select id="queryStuFields" resultType="java.util.Map">
+		SELECT
+		t1.field_val_val,
+		t1.field_val_key,
+		t1.field_id,
+		t2.field_code,
+		t2.field_name
+		FROM
+		tb_erm_stu_value t1
+		LEFT JOIN tb_erm_field t2 ON t1.field_id = t2.id
+		WHERE
+		t1.stu_id = #{stuId} and t1.flag = 1
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		tb_erm_field
+		where flag = #{flag}
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmFieldEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_field
+		(
+		`field_code`,
+		`field_name`,
+		`type`,
+		`weight`,
+		`flag`
+		)
+		values
+		(
+		#{fieldCode},
+		#{fieldName},
+		#{type},
+		#{weight},
+		#{flag}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmFieldEntity">
+		update tb_erm_field
+		<set>
+			<if test="fieldCode != null">`field_code` = #{fieldCode}, </if>
+			<if test="fieldName != null">`field_name` = #{fieldName}, </if>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="weight != null">`weight` = #{weight}, </if>
+			<if test="flag != null">`flag` = #{flag}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		update tb_erm_field set flag =-1 where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		update tb_erm_field set flag = -1 where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

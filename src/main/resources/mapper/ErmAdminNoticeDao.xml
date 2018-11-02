@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmAdminNoticeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.coomia.erm.entity.ErmAdminNoticeEntity" id="ermAdminNoticeMap">
+        <result property="id" column="id"/>
+        <result property="adminId" column="admin_id"/>
+        <result property="noticeId" column="notice_id"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updator" column="updator"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+	<select id="queryObject" resultMap="ermAdminNoticeMap">
+		select * from tb_erm_admin_notice where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="ermAdminNoticeMap">
+		select * from tb_erm_admin_notice
+		  <where>
+	          <if test="adminId!=null">
+	          and admin_id=#{adminId}
+	          </if>
+	          <if test="noticeId!=null">
+	          and notice_id=#{noticeId}
+	          </if>
+	         </where>
+		
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_erm_admin_notice 
+	</select>
+	 
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmAdminNoticeEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_admin_notice
+		(
+			`admin_id`, 
+			`notice_id`, 
+			`creator`, 
+			`create_time`, 
+			`updator`, 
+			`update_time`
+		)
+		values
+		(
+			#{adminId}, 
+			#{noticeId}, 
+			#{creator}, 
+			#{createTime}, 
+			#{updator}, 
+			#{updateTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.coomia.erm.entity.ErmAdminNoticeEntity">
+		update tb_erm_admin_notice 
+		<set>
+			<if test="adminId != null">`admin_id` = #{adminId}, </if>
+			<if test="noticeId != null">`notice_id` = #{noticeId}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_erm_admin_notice where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_erm_admin_notice where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

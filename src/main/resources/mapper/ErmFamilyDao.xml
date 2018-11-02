@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmFamilyDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.coomia.erm.entity.ErmFamilyEntity" id="ermFamilyMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="address" column="address"/>
+        <result property="contact" column="contact"/>
+        <result property="phone" column="phone"/>
+        <result property="level" column="level"/>
+        <result property="headman" column="headman"/>
+        <result property="describ" column="describ"/>
+        <result property="father" column="father"/>
+        <result property="mother" column="mother"/>
+        <result property="fatherJob" column="father_job"/>
+        <result property="motherJob" column="mother_job"/>
+        <result property="fatherAblity" column="father_ablity"/>
+        <result property="motherAblity" column="mother_ablity"/>
+        <result property="otherAblity" column="other_ablity"/>
+        <result property="houseInfo" column="house_info"/>
+        <result property="medicineOutcome" column="medicine_outcome"/>
+        <result property="disasterInfo" column="disaster_info"/>
+        <result property="policyCare" column="policy_care"/>
+        <result property="studentsCount" column="students_count"/>
+        <result property="familyChange" column="family_change"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updator" column="updator"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="fatherAge" column="father_age"/>
+        <result property="motherAge" column="mother_age"/>
+        <result property="familyIncome" column="family_income"/>
+        <result property="applyReason" column="apply_reason"/>
+        <result property="evidenceUrls" column="evidence_urls"/>
+        <result property="isArchives" column="is_archives"/>
+        <result property="archiveName" column="archive_name"/>
+        <result property="archiveIdcard" column="archive_idcard"/>
+        <result property="archiveUplode" column="archive_uplode"/>
+
+		<result property="archiveRelation" column="archiveRelation"/>
+		<result property="archiveAcount" column="archiveAcount"/>
+		<result property="supportName" column="supportName"/>
+		<result property="supportBankCard" column="supportBankCard"/>
+		<result property="helperName" column="helperName"/>
+		<result property="helperWorkPlace" column="helperWorkPlace"/>
+		<result property="helperPosition" column="helperPosition"/>
+		<result property="helperTel" column="helperTel"/>
+    </resultMap>
+
+	<select id="queryObject" resultMap="ermFamilyMap">
+		select * from tb_erm_family where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="ermFamilyMap">
+		select * from tb_erm_family
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from tb_erm_family 
+	</select>
+	 
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmFamilyEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_family
+		(
+			`name`, 
+			`address`, 
+			`contact`, 
+			`phone`, 
+			`level`, 
+			`headman`, 
+			`describ`, 
+			`father`, 
+			`mother`, 
+			`father_job`, 
+			`mother_job`, 
+			`father_ablity`, 
+			`mother_ablity`, 
+			`other_ablity`, 
+			`house_info`, 
+			`medicine_outcome`, 
+			`disaster_info`, 
+			`policy_care`, 
+			`students_count`, 
+			`family_change`, 
+			`creator`, 
+			`create_time`, 
+			`updator`, 
+			`update_time`,
+			`father_age`,
+			`mother_age`,
+			`family_income`,
+			`apply_reason`,
+			`evidence_urls`,
+			`is_archives`,
+			`archive_name`,
+			`archive_idcard`,
+			`archive_uplode`,
+			`archiveRelation`,
+			`archiveAcount`,
+			`supportName`,
+			`supportBankCard`,
+			`helperName`,
+			`helperWorkPlace`,
+			`helperPosition`,
+			`helperTel`
+		)
+		values
+		(
+			#{name}, 
+			#{address}, 
+			#{contact}, 
+			#{phone}, 
+			#{level}, 
+			#{headman}, 
+			#{describ}, 
+			#{father}, 
+			#{mother}, 
+			#{fatherJob}, 
+			#{motherJob}, 
+			#{fatherAblity}, 
+			#{motherAblity}, 
+			#{otherAblity}, 
+			#{houseInfo}, 
+			#{medicineOutcome}, 
+			#{disasterInfo}, 
+			#{policyCare}, 
+			#{studentsCount}, 
+			#{familyChange}, 
+			#{creator}, 
+			#{createTime}, 
+			#{updator}, 
+			#{updateTime},
+			#{fatherAge},
+			#{motherAge},
+			#{familyIncome},
+			#{applyReason},
+			#{evidenceUrls},
+			#{isArchives},
+			#{archiveName},
+			#{archiveIdcard},
+			#{archiveUplode},
+
+			#{archiveRelation},
+			#{archiveAcount},
+			#{supportName},
+			#{supportBankCard},
+			#{helperName},
+			#{helperWorkPlace},
+			#{helperPosition},
+			#{helperTel}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.coomia.erm.entity.ErmFamilyEntity">
+		update tb_erm_family 
+		<set>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="address != null">`address` = #{address}, </if>
+			<if test="contact != null">`contact` = #{contact}, </if>
+			<if test="phone != null">`phone` = #{phone}, </if>
+			<if test="level != null">`level` = #{level}, </if>
+			<if test="headman != null">`headman` = #{headman}, </if>
+			<if test="describ != null">`describ` = #{describ}, </if>
+			<if test="father != null">`father` = #{father}, </if>
+			<if test="mother != null">`mother` = #{mother}, </if>
+			<if test="fatherJob != null">`father_job` = #{fatherJob}, </if>
+			<if test="motherJob != null">`mother_job` = #{motherJob}, </if>
+			<if test="fatherAblity != null">`father_ablity` = #{fatherAblity}, </if>
+			<if test="motherAblity != null">`mother_ablity` = #{motherAblity}, </if>
+			<if test="otherAblity != null">`other_ablity` = #{otherAblity}, </if>
+			<if test="houseInfo != null">`house_info` = #{houseInfo}, </if>
+			<if test="medicineOutcome != null">`medicine_outcome` = #{medicineOutcome}, </if>
+			<if test="disasterInfo != null">`disaster_info` = #{disasterInfo}, </if>
+			<if test="policyCare != null">`policy_care` = #{policyCare}, </if>
+			<if test="studentsCount != null">`students_count` = #{studentsCount}, </if>
+			<if test="familyChange != null">`family_change` = #{familyChange}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime},</if>
+			<if test="fatherAge != null">`father_age` = #{fatherAge},</if>
+			<if test="motherAge != null">`mother_age` = #{motherAge},</if>
+			<if test="familyIncome != null">`family_income` = #{familyIncome},</if>
+			<if test="applyReason != null">`apply_reason` = #{applyReason},</if>
+			<if test="evidenceUrls != null">`evidence_urls` = #{evidenceUrls},</if>
+			<if test="isArchives != null">`is_archives` = #{isArchives},</if>
+			<if test="archiveName != null">`archive_name` = #{archiveName},</if>
+			<if test="archiveIdcard != null">`archive_idcard` = #{archiveIdcard},</if>
+			<if test="archiveUplode != null">`archive_uplode` = #{archiveUplode},</if>
+
+			<if test="archiveRelation != null">`archiveRelation` = #{archiveRelation},</if>
+			<if test="archiveAcount != null">`archiveAcount` = #{archiveAcount},</if>
+			<if test="supportName != null">`supportName` = #{supportName},</if>
+			<if test="supportBankCard != null">`supportBankCard` = #{supportBankCard},</if>
+			<if test="helperName != null">`helperName` = #{helperName},</if>
+			<if test="helperWorkPlace != null">`helperWorkPlace` = #{helperWorkPlace},</if>
+			<if test="helperPosition != null">`helperPosition` = #{helperPosition},</if>
+			<if test="helperTel != null">`helperTel` = #{helperTel}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from tb_erm_family where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from tb_erm_family where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

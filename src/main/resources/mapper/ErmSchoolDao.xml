@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.coomia.erm.dao.ErmSchoolDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+	<resultMap type="com.coomia.erm.entity.ErmSchoolEntity" id="ermSchoolMap">
+		<result property="id" column="id" />
+		<result property="ebId" column="eb_id" />
+		<result property="type" column="type" />
+		<result property="code" column="code" />
+		<result property="name" column="name" />
+		<result property="seal" column="seal" />
+		<result property="creator" column="creator" />
+		<result property="createTime" column="create_time" />
+		<result property="updator" column="updator" />
+		<result property="updateTime" column="update_time" />
+	</resultMap>
+
+	<select id="queryObject" resultMap="ermSchoolMap">
+		select * from tb_erm_school
+		where id = #{value}
+	</select>
+
+	<select id="queryList" resultMap="ermSchoolMap">
+		select * from tb_erm_school where 1=1
+		<if test="ebId != null and ebId != ''">and eb_id = #{ebId}</if>
+		<if test="fundName != null and fundName != ''">
+			and id in(select school_id from tb_erm_school_funded where
+			funded_id in(select id from tb_erm_funded where name like
+			'%${fundName}%'))
+		</if>
+		<choose>
+			<when test="sidx != null and sidx.trim() != ''">
+				order by ${sidx} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryListByFundedId" resultMap="ermSchoolMap">
+		select * from
+		tb_erm_school where id in(select school_id from tb_erm_school_funded
+		where funded_id= #{fundedId})
+
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		tb_erm_school where eb_id = #{ebId}
+	</select>
+
+	<insert id="save" parameterType="com.coomia.erm.entity.ErmSchoolEntity"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into tb_erm_school
+		(
+		`eb_id`,
+		`type`,
+		`code`,
+		`name`,
+		`seal`,
+		`creator`,
+		`create_time`,
+		`updator`,
+		`update_time`
+		)
+		values
+		(
+		#{ebId},
+		#{type},
+		#{code},
+		#{name},
+		#{seal},
+		#{creator},
+		#{createTime},
+		#{updator},
+		#{updateTime}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.coomia.erm.entity.ErmSchoolEntity">
+		update tb_erm_school
+		<set>
+			<if test="ebId != null">`eb_id` = #{ebId}, </if>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="code != null">`code` = #{code}, </if>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="seal != null">`seal` = #{seal}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="updator != null">`updator` = #{updator}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from tb_erm_school where id = #{value}
+	</delete>
+
+	<delete id="deleteBatch">
+		delete from tb_erm_school where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="queryObjectBySchCode" resultMap="ermSchoolMap">
+		select * from
+		tb_erm_school
+		where code = #{schCode}
+	</select>
+
+	<select id="selectBatch" resultMap="ermSchoolMap">
+		select * from tb_erm_school where code in
+		<foreach item="id" collection="array" open="(" separator=","
+	close=")">
+	#{id}
+		</foreach>
+
+	</select>
+	<select id="selectBatchType" resultMap="ermSchoolMap">
+		select * from tb_erm_school where type in
+		<foreach item="id" collection="array" open="(" separator=","
+				 close=")">
+			#{id}
+		</foreach>
+
+	</select>
+</mapper>
